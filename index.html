@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Wholphin Search - プライバシーを重視したモバイル検索エンジン">
-    <meta name="theme-color" content="#0ea5e9">
+    <meta name="theme-color" content="#0369a1">
     <title>Wholphin Search</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%230369a1'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%230369a1'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%230369a1'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/normalize.css">
@@ -24,7 +29,7 @@
         <!-- Header -->
         <header class="mobile-header">
             <div class="flex items-center justify-between">
-                <h1 class="text-xl font-bold text-primary">Wholphin Search</h1>
+                <h1 class="text-3xl font-extrabold text-primary" style="margin-bottom: 0;">Wholphin Search</h1>
                 <button class="btn-icon btn-ghost" @click="showSettings = !showSettings" aria-label="設定">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
@@ -55,7 +60,7 @@
             </div>
 
             <!-- Search Type Tabs -->
-            <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <div class="flex gap-2 mb-6 scroll-x pb-2">
                 <button 
                     v-for="type in searchTypes" 
                     :key="type.value"
@@ -67,30 +72,34 @@
             </div>
 
             <!-- Settings Panel -->
-            <div v-if="showSettings" class="card mb-6">
-                <div class="card-header">検索設定</div>
-                <div class="card-body stack-sm">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">セーフサーチ</label>
-                        <select v-model.number="safesearch" class="input input-sm">
-                            <option :value="0">無効</option>
-                            <option :value="1">標準</option>
-                            <option :value="2">厳格</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">言語</label>
-                        <select v-model="language" class="input input-sm">
-                            <option value="ja">日本語</option>
-                            <option value="en">English</option>
-                        </select>
+            <transition name="slide-down">
+                <div v-if="showSettings" class="card mb-6 settings-panel">
+                    <div class="card-header">検索設定</div>
+                    <div class="card-body stack-sm">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">セーフサーチ</label>
+                            <select v-model.number="safesearch" class="input input-sm">
+                                <option :value="0">無効</option>
+                                <option :value="1">標準</option>
+                                <option :value="2">厳格</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">言語</label>
+                            <select v-model="language" class="input input-sm">
+                                <option value="ja">日本語</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </transition>
 
-            <!-- Loading State -->
-            <div v-if="loading" class="flex justify-center items-center py-12">
-                <div class="spinner spinner-lg"></div>
+            <!-- Loading State with Skeleton -->
+            <div v-if="loading">
+                <div class="stack">
+                    <div class="skeleton skeleton-card" v-for="i in 3" :key="i"></div>
+                </div>
             </div>
 
             <!-- Error State -->
@@ -99,98 +108,100 @@
             </div>
 
             <!-- Results -->
-            <div v-if="!loading && results.length > 0" class="stack">
-                <!-- Web Results -->
-                <div v-if="currentType === 'web'" class="stack">
-                    <article v-for="(item, index) in results" :key="index" class="card">
-                        <a :href="item.url" target="_blank" rel="noopener noreferrer" class="block">
-                            <h3 class="text-lg font-semibold mb-2 text-primary">{{ item.title }}</h3>
-                            <p class="text-sm text-secondary mb-2">{{ item.description }}</p>
-                            <p class="text-xs text-tertiary truncate">{{ item.url }}</p>
-                        </a>
-                    </article>
-                </div>
+            <transition name="fade" mode="out-in">
+                <div v-if="!loading && results.length > 0" :key="currentType" class="stack" :class="getResultStackClass()">
+                    <!-- Web Results -->
+                    <div v-if="currentType === 'web'" class="stack-web">
+                        <article v-for="(item, index) in results" :key="index" class="card">
+                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="block">
+                                <h3 class="text-lg font-semibold mb-2 text-primary">{{ item.title }}</h3>
+                                <p class="text-sm text-secondary mb-2 text-description">{{ item.description }}</p>
+                                <p class="text-xs text-tertiary truncate">{{ item.url }}</p>
+                            </a>
+                        </article>
+                    </div>
 
-                <!-- Image Results -->
-                <div v-if="currentType === 'image'" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <a 
-                        v-for="(item, index) in results" 
-                        :key="index" 
-                        :href="item.url" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        class="card p-0 overflow-hidden"
-                    >
-                        <img :src="item.thumbnail" :alt="item.title" class="w-full h-48 object-cover">
-                        <div class="p-2">
-                            <p class="text-sm truncate">{{ item.title }}</p>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Video Results -->
-                <div v-if="currentType === 'video'" class="stack">
-                    <article v-for="(item, index) in results" :key="index" class="card">
-                        <a :href="item.url" target="_blank" rel="noopener noreferrer" class="block">
-                            <div v-if="item.thumbnail" class="mb-3">
-                                <img :src="item.thumbnail" :alt="item.title" class="w-full rounded-lg">
-                            </div>
-                            <h3 class="text-lg font-semibold mb-2 text-primary">{{ item.title }}</h3>
-                            <p class="text-sm text-secondary mb-2">{{ item.description }}</p>
-                            <div class="flex items-center gap-2 text-xs text-tertiary">
-                                <span v-if="item.duration">{{ item.duration }}</span>
-                                <span v-if="item.views">{{ item.views }} 回視聴</span>
+                    <!-- Image Results -->
+                    <div v-if="currentType === 'image'" class="grid grid-cols-2 md:grid-cols-3">
+                        <a 
+                            v-for="(item, index) in results" 
+                            :key="index" 
+                            :href="item.url" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="card p-0 overflow-hidden"
+                        >
+                            <img :src="item.thumbnail" :alt="item.title" class="w-full h-48 object-cover" loading="lazy">
+                            <div class="p-2">
+                                <p class="text-sm truncate">{{ item.title }}</p>
                             </div>
                         </a>
-                    </article>
-                </div>
+                    </div>
 
-                <!-- News Results -->
-                <div v-if="currentType === 'news'" class="stack">
-                    <article v-for="(item, index) in results" :key="index" class="card">
-                        <a :href="item.url" target="_blank" rel="noopener noreferrer" class="block">
-                            <div class="flex gap-3">
-                                <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.title" class="w-24 h-24 rounded object-cover">
-                                <div class="flex-1">
-                                    <h3 class="text-base font-semibold mb-1 text-primary">{{ item.title }}</h3>
-                                    <p class="text-sm text-secondary mb-2 line-clamp-2">{{ item.description }}</p>
-                                    <div class="flex items-center gap-2 text-xs text-tertiary">
-                                        <span v-if="item.source">{{ item.source }}</span>
-                                        <span v-if="item.date">{{ item.date }}</span>
+                    <!-- Video Results -->
+                    <div v-if="currentType === 'video'" class="stack-video">
+                        <article v-for="(item, index) in results" :key="index" class="card">
+                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="block">
+                                <div v-if="item.thumbnail" class="mb-3">
+                                    <img :src="item.thumbnail" :alt="item.title" class="w-full rounded-lg" loading="lazy">
+                                </div>
+                                <h3 class="text-lg font-semibold mb-2 text-primary">{{ item.title }}</h3>
+                                <p class="text-sm text-secondary mb-2 text-description">{{ item.description }}</p>
+                                <div class="flex items-center gap-2 text-xs text-tertiary">
+                                    <span v-if="item.duration">{{ item.duration }}</span>
+                                    <span v-if="item.views">{{ item.views }} 回視聴</span>
+                                </div>
+                            </a>
+                        </article>
+                    </div>
+
+                    <!-- News Results -->
+                    <div v-if="currentType === 'news'" class="stack-news">
+                        <article v-for="(item, index) in results" :key="index" class="card">
+                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="block">
+                                <div class="flex gap-3">
+                                    <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.title" class="w-24 h-24 rounded object-cover" loading="lazy">
+                                    <div class="flex-1">
+                                        <h3 class="text-base font-semibold mb-1 text-primary">{{ item.title }}</h3>
+                                        <p class="text-sm text-secondary mb-2 line-clamp-2 text-description">{{ item.description }}</p>
+                                        <div class="flex items-center gap-2 text-xs text-tertiary">
+                                            <span v-if="item.source">{{ item.source }}</span>
+                                            <span v-if="item.date">{{ item.date }}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </a>
-                    </article>
-                </div>
+                            </a>
+                        </article>
+                    </div>
 
-                <!-- Suggestions -->
-                <div v-if="currentType === 'suggest'" class="stack-sm">
-                    <button 
-                        v-for="(item, index) in results" 
-                        :key="index" 
-                        @click="selectSuggestion(item)"
-                        class="card text-left hover:bg-secondary transition"
-                    >
-                        {{ item }}
-                    </button>
-                </div>
+                    <!-- Suggestions -->
+                    <div v-if="currentType === 'suggest'" class="stack-sm">
+                        <button 
+                            v-for="(item, index) in results" 
+                            :key="index" 
+                            @click="selectSuggestion(item)"
+                            class="card text-left transition"
+                        >
+                            {{ item }}
+                        </button>
+                    </div>
 
-                <!-- Panel Info -->
-                <div v-if="currentType === 'panel' && panelData" class="card">
-                    <div class="card-header">{{ panelData.title }}</div>
-                    <div class="card-body">
-                        <img v-if="panelData.image" :src="panelData.image" :alt="panelData.title" class="w-full rounded-lg mb-4">
-                        <p class="text-secondary">{{ panelData.description }}</p>
-                        <div v-if="panelData.facts" class="mt-4 stack-sm">
-                            <div v-for="(fact, index) in panelData.facts" :key="index" class="flex justify-between border-b pb-2">
-                                <span class="font-medium">{{ fact.label }}</span>
-                                <span class="text-secondary">{{ fact.value }}</span>
+                    <!-- Panel Info -->
+                    <div v-if="currentType === 'panel' && panelData" class="card">
+                        <div class="card-header">{{ panelData.title }}</div>
+                        <div class="card-body">
+                            <img v-if="panelData.image" :src="panelData.image" :alt="panelData.title" class="w-full rounded-lg mb-4" loading="lazy">
+                            <p class="text-secondary text-description">{{ panelData.description }}</p>
+                            <div v-if="panelData.facts" class="mt-4 stack-sm">
+                                <div v-for="(fact, index) in panelData.facts" :key="index" class="flex justify-between border-b pb-2">
+                                    <span class="font-medium">{{ fact.label }}</span>
+                                    <span class="text-secondary">{{ fact.value }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </transition>
 
             <!-- Empty State -->
             <div v-if="!loading && !error && searchPerformed && results.length === 0" class="text-center py-12">
@@ -198,7 +209,7 @@
             </div>
 
             <!-- Pagination -->
-            <div v-if="!loading && results.length > 0 && totalPages > 1" class="flex justify-center gap-2 mt-8">
+            <div v-if="!loading && results.length > 0 && totalPages > 1" class="flex justify-center gap-2 mt-8 safe-all">
                 <button 
                     @click="changePage(currentPage - 1)"
                     :disabled="currentPage === 1"
@@ -342,9 +353,42 @@
                     this.query = suggestion;
                     this.currentType = 'web';
                     this.performSearch();
+                },
+                getResultStackClass() {
+                    const classMap = {
+                        'web': 'stack-web',
+                        'image': '',
+                        'video': 'stack-video',
+                        'news': 'stack-news',
+                        'suggest': 'stack-sm',
+                        'panel': ''
+                    };
+                    return classMap[this.currentType] || 'stack';
                 }
             }
         }).mount('#app');
     </script>
+    
+    <style>
+        /* Vue transitions */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+        
+        .slide-down-enter-active, .slide-down-leave-active {
+            transition: all 0.3s ease;
+        }
+        .slide-down-enter-from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        .slide-down-leave-to {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+    </style>
 </body>
 </html>
