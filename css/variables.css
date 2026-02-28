@@ -1,199 +1,89 @@
-/**
- * Design Tokens - Apple Design System Inspired
- * Based on 8px grid system and Human Interface Guidelines
- */
-
 :root {
-  /* 8px Grid System - Apple's fundamental spacing unit */
-  --space-0: 0;
-  --space-4: 4px;    /* 0.5 unit - micro spacing */
-  --space-8: 8px;    /* 1 unit - base */
-  --space-12: 12px;  /* 1.5 units */
-  --space-16: 16px;  /* 2 units */
-  --space-20: 20px;  /* 2.5 units */
-  --space-24: 24px;  /* 3 units */
-  --space-32: 32px;  /* 4 units */
-  --space-40: 40px;  /* 5 units */
-  --space-48: 48px;  /* 6 units */
-  --space-64: 64px;  /* 8 units */
-  --space-80: 80px;  /* 10 units */
-  --space-96: 96px;  /* 12 units */
-
-  /* iOS Standard Heights */
-  --header-height: 52px;
-  --header-compact-height: 44px;
-  --tab-bar-height: 56px;
-  --search-bar-height: 44px;
-  --touch-target-min: 44px;
-
-  /* Apple Typography Scale - SF Pro Display/Text inspired */
-  --font-size-11: 11px;  /* Caption 2 */
-  --font-size-12: 12px;  /* Caption 1 */
-  --font-size-13: 13px;  /* Footnote */
-  --font-size-15: 15px;  /* Subheadline */
-  --font-size-17: 17px;  /* Body - iOS default */
-  --font-size-19: 19px;  /* Callout */
-  --font-size-20: 20px;  /* Title 3 */
-  --font-size-22: 22px;  /* Title 2 */
-  --font-size-28: 28px;  /* Title 1 */
-  --font-size-34: 34px;  /* Large Title */
-
-  /* Font Weights - Apple's precise hierarchy */
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-
-  /* Line Heights - Content-specific */
-  --line-height-tight: 1.2;      /* Headlines */
-  --line-height-normal: 1.4;     /* Body text */
-  --line-height-relaxed: 1.5;    /* Descriptions */
-  --line-height-loose: 1.6;      /* Long-form content */
-
-  /* Apple Color Palette - Light Mode */
-  --color-primary: #007AFF;           /* iOS Blue */
-  --color-primary-hover: #0051D5;    /* Darker blue */
-  --color-primary-active: #004EBA;   /* Deepest blue */
-  --color-primary-subtle: rgba(0, 122, 255, 0.1);
-
-  /* System Grays - Apple's 6-step gray scale */
-  --color-gray-1: #8E8E93;  /* Secondary text */
-  --color-gray-2: #AEAEB2;  /* Tertiary text */
-  --color-gray-3: #C7C7CC;  /* Quaternary text */
-  --color-gray-4: #D1D1D6;  /* Separator */
-  --color-gray-5: #E5E5EA;  /* Secondary fill */
-  --color-gray-6: #F2F2F7;  /* Tertiary fill - Background */
-
-  /* Semantic Colors */
-  --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F2F2F7;
-  --color-bg-tertiary: #FFFFFF;
-  --color-bg-elevated: #FFFFFF;
-  
-  --color-text-primary: #000000;
-  --color-text-secondary: #8E8E93;
-  --color-text-tertiary: #AEAEB2;
-  --color-text-quaternary: #C7C7CC;
-
-  --color-border-primary: rgba(0, 0, 0, 0.04);
-  --color-border-secondary: rgba(0, 0, 0, 0.08);
-  --color-border-focus: rgba(0, 122, 255, 0.4);
-
-  --color-overlay: rgba(0, 0, 0, 0.4);
-
-  /* Feedback Colors */
-  --color-success: #34C759;
-  --color-warning: #FF9500;
-  --color-error: #FF3B30;
-  --color-info: #007AFF;
-
-  --color-success-bg: rgba(52, 199, 89, 0.1);
-  --color-warning-bg: rgba(255, 149, 0, 0.1);
-  --color-error-bg: rgba(255, 59, 48, 0.1);
-  --color-info-bg: rgba(0, 122, 255, 0.1);
-
-  /* Shadows - Apple's depth system */
-  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.06);                /* Subtle elevation */
-  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.08);                /* Card elevation */
-  --shadow-3: 0 4px 16px rgba(0, 0, 0, 0.10);               /* Modal elevation */
-  --shadow-4: 0 8px 32px rgba(0, 0, 0, 0.12);               /* Dropdown elevation */
-  --shadow-5: 0 16px 48px rgba(0, 0, 0, 0.14);              /* Max elevation */
-  
-  --shadow-focus: 0 0 0 4px rgba(0, 122, 255, 0.25);
-
-  /* Border Radius - Apple's rounded corners */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
-  --radius-3xl: 24px;
-  --radius-full: 9999px;
-
-  /* Transitions - Apple's motion curves */
-  --ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);           /* Standard easing */
-  --ease-in-apple: cubic-bezier(0.42, 0, 1, 1);             /* Deceleration */
-  --ease-out-apple: cubic-bezier(0, 0, 0.58, 1);            /* Acceleration */
-  --ease-in-out-apple: cubic-bezier(0.42, 0, 0.58, 1);      /* Sharp easing */
-  
-  --duration-instant: 0ms;
-  --duration-fast: 150ms;
-  --duration-base: 250ms;
-  --duration-slow: 350ms;
-  --duration-slower: 500ms;
-
-  --transition-fast: var(--duration-fast) var(--ease-apple);
-  --transition-base: var(--duration-base) var(--ease-apple);
-  --transition-slow: var(--duration-slow) var(--ease-apple);
-
-  /* Z-index layers */
-  --z-base: 0;
-  --z-dropdown: 1000;
-  --z-sticky: 1020;
-  --z-fixed: 1030;
-  --z-modal-backdrop: 1040;
-  --z-modal: 1050;
-  --z-popover: 1060;
-  --z-tooltip: 1070;
-}
-
-/* Dark Mode - Apple's refined dark palette */
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Primary colors adjusted for dark mode */
-    --color-primary: #0A84FF;           /* Brighter blue for dark */
-    --color-primary-hover: #409CFF;
-    --color-primary-active: #64AEFF;
-    --color-primary-subtle: rgba(10, 132, 255, 0.15);
-
-    /* System Grays - Inverted for dark mode */
-    --color-gray-1: #98989D;
-    --color-gray-2: #8E8E93;
-    --color-gray-3: #636366;
-    --color-gray-4: #48484A;
-    --color-gray-5: #3A3A3C;
-    --color-gray-6: #1C1C1E;
-
-    /* Backgrounds - Elevated cards are lighter in dark mode */
-    --color-bg-primary: #000000;
-    --color-bg-secondary: #1C1C1E;
-    --color-bg-tertiary: #2C2C2E;
-    --color-bg-elevated: #1C1C1E;
-
-    /* Text - Higher contrast in dark mode */
-    --color-text-primary: #FFFFFF;
-    --color-text-secondary: #98989D;
+    /* Colors - Light Mode */
+    --color-primary: #007AFF;
+    --color-primary-hover: #0051D5;
+    --color-secondary: #5856D6;
+    --color-success: #34C759;
+    --color-warning: #FF9500;
+    --color-danger: #FF3B30;
+    
+    --color-background: #F2F2F7;
+    --color-surface: #FFFFFF;
+    --color-surface-secondary: rgba(255, 255, 255, 0.7);
+    --color-border: rgba(0, 0, 0, 0.08);
+    --color-hover: rgba(0, 0, 0, 0.05);
+    --color-active: rgba(0, 0, 0, 0.1);
+    --color-shadow: rgba(0, 0, 0, 0.1);
+    
+    --color-text: #1C1C1E;
+    --color-text-secondary: #3A3A3C;
     --color-text-tertiary: #8E8E93;
-    --color-text-quaternary: #636366;
-
-    /* Borders - Subtle in dark mode */
-    --color-border-primary: rgba(255, 255, 255, 0.08);
-    --color-border-secondary: rgba(255, 255, 255, 0.12);
-    --color-border-focus: rgba(10, 132, 255, 0.5);
-
-    --color-overlay: rgba(0, 0, 0, 0.7);
-
-    /* Feedback colors remain vibrant */
-    --color-success: #30D158;
-    --color-warning: #FF9F0A;
-    --color-error: #FF453A;
-
-    /* Shadows are more pronounced in dark mode */
-    --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.5);
-    --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.6);
-    --shadow-3: 0 4px 16px rgba(0, 0, 0, 0.7);
-    --shadow-4: 0 8px 32px rgba(0, 0, 0, 0.8);
-    --shadow-5: 0 16px 48px rgba(0, 0, 0, 0.9);
-  }
+    --color-text-quaternary: #C7C7CC;
+    
+    /* Liquid Glass */
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: rgba(0, 0, 0, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.5);
+    --glass-blur: 40px;
+    --glass-heavy-blur: 60px;
+    
+    /* Transitions */
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.5rem;
+    --spacing-2xl: 2rem;
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+    
+    /* Typography */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
 }
 
-/* Motion preferences - Respect user's accessibility settings */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --duration-instant: 0ms;
-    --duration-fast: 0ms;
-    --duration-base: 0ms;
-    --duration-slow: 0ms;
-    --duration-slower: 0ms;
-  }
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-primary: #0A84FF;
+        --color-primary-hover: #409CFF;
+        --color-secondary: #5E5CE6;
+        --color-success: #32D74B;
+        --color-warning: #FF9F0A;
+        --color-danger: #FF453A;
+        
+        --color-background: #000000;
+        --color-surface: #1C1C1E;
+        --color-surface-secondary: rgba(28, 28, 30, 0.7);
+        --color-border: rgba(255, 255, 255, 0.08);
+        --color-hover: rgba(255, 255, 255, 0.05);
+        --color-active: rgba(255, 255, 255, 0.1);
+        --color-shadow: rgba(0, 0, 0, 0.5);
+        
+        --color-text: #FFFFFF;
+        --color-text-secondary: #EBEBF5;
+        --color-text-tertiary: #8E8E93;
+        --color-text-quaternary: #48484A;
+        
+        /* Liquid Glass - Dark Mode */
+        --glass-bg: rgba(28, 28, 30, 0.78);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --glass-shadow: rgba(0, 0, 0, 0.5);
+        --glass-highlight: rgba(255, 255, 255, 0.1);
+    }
 }
