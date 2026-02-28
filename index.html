@@ -18,12 +18,13 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/utilities.css">
     <link rel="stylesheet" href="css/desktop.css">
+    <link rel="stylesheet" href="css/advanced-features.css">
     
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
     <div id="app">
-        <!-- Desktop Sidebar Navigation (hidden on mobile) -->
+        <!-- Desktop Sidebar -->
         <aside class="desktop-sidebar">
             <div class="sidebar-logo">
                 <div class="sidebar-logo-icon">
@@ -66,11 +67,36 @@
             </div>
         </aside>
 
-        <!-- Desktop Main Area -->
+        <!-- Desktop Main -->
         <div class="desktop-main">
-            <!-- Header with Toolbar -->
+            <!-- Tab Bar (Desktop) -->
+            <div class="tab-bar-container">
+                <button 
+                    v-for="tab in tabs" 
+                    :key="tab.id"
+                    @click="switchTab(tab.id)"
+                    :class="['search-tab', { 'active': activeTabId === tab.id }]"
+                >
+                    <span class="search-tab-label">{{ tab.title }}</span>
+                    <button 
+                        v-if="tabs.length > 1"
+                        class="search-tab-close"
+                        @click.stop="closeTab(tab.id)"
+                    >
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 3L3 9M3 3l6 6"/>
+                        </svg>
+                    </button>
+                </button>
+                <button class="tab-new" @click="createNewTab" title="新しいタブ">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3v10M3 8h10"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Header -->
             <header class="mobile-header" :class="{ 'header-compact': searchPerformed }">
-                <!-- Mobile logo (hidden on desktop) -->
                 <div class="logo-container">
                     <div class="logo-icon">
                         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -81,7 +107,6 @@
                     <h1 class="logo-text">Wholphin</h1>
                 </div>
 
-                <!-- Desktop Toolbar -->
                 <div class="desktop-toolbar">
                     <div class="search-box-wrapper">
                         <div class="search-box">
@@ -105,6 +130,7 @@
                             </button>
                         </div>
                         
+                        <!-- Suggestions -->
                         <transition name="slide-down">
                             <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-dropdown">
                                 <button 
@@ -119,6 +145,36 @@
                                     </svg>
                                     <span>{{ suggestion }}</span>
                                 </button>
+                            </div>
+                        </transition>
+
+                        <!-- Search History -->
+                        <transition name="slide-down">
+                            <div v-if="showHistory && searchHistory.length > 0" class="search-history-dropdown">
+                                <div class="history-section">
+                                    <div class="history-section-title">最近の検索</div>
+                                    <button 
+                                        v-for="(item, index) in searchHistory" 
+                                        :key="index"
+                                        class="history-item"
+                                        @click="selectHistory(item)"
+                                    >
+                                        <svg class="history-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <polyline points="12 6 12 12 16 14"/>
+                                        </svg>
+                                        <div class="history-text">
+                                            <div class="history-query">{{ item.query }}</div>
+                                            <div class="history-meta">{{ formatTimestamp(item.timestamp) }} · {{ getTypeLabel(item.type) }}</div>
+                                        </div>
+                                        <button class="history-delete" @click.stop="deleteHistory(item.query)">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M12 4L4 12M4 4l8 8"/>
+                                            </svg>
+                                        </button>
+                                    </button>
+                                </div>
+                                <button class="history-clear" @click="clearHistory">履歴をクリア</button>
                             </div>
                         </transition>
                     </div>
@@ -148,7 +204,7 @@
                 </div>
             </header>
 
-            <!-- Settings Panel -->
+            <!-- Settings -->
             <transition name="slide-down">
                 <div v-if="showSettings" class="settings-panel">
                     <div class="settings-card">
@@ -179,12 +235,10 @@
                 </div>
             </transition>
 
-            <!-- Content with 3-column layout -->
+            <!-- Content -->
             <div class="desktop-content">
-                <!-- Main Content -->
                 <main class="main-content">
                     <div class="container">
-                        <!-- Loading State -->
                         <div v-if="loading" class="content-area">
                             <div class="stack">
                                 <div class="skeleton-result" v-for="i in 3" :key="i">
@@ -198,7 +252,6 @@
                             </div>
                         </div>
 
-                        <!-- Error State -->
                         <div v-if="error" class="alert alert-warning content-area">
                             <div class="alert-icon">
                                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -213,10 +266,8 @@
                             </div>
                         </div>
 
-                        <!-- Results -->
                         <transition name="fade" mode="out-in">
                             <div v-if="!loading && results.length > 0" :key="currentType" :class="['results-container', 'content-area', 'density-' + density]">
-                                <!-- Web Results -->
                                 <div v-if="currentType === 'web'" class="stack-web">
                                     <article v-for="(item, index) in results" :key="index" class="result-card" @contextmenu.prevent="showContextMenuFor(item, $event)">
                                         <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
@@ -242,16 +293,8 @@
                                     </article>
                                 </div>
 
-                                <!-- Image Results -->
                                 <div v-if="currentType === 'image'" class="image-grid">
-                                    <a 
-                                        v-for="(item, index) in results" 
-                                        :key="index" 
-                                        :href="item.url" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        class="image-item"
-                                    >
+                                    <a v-for="(item, index) in results" :key="index" :href="item.url" target="_blank" rel="noopener noreferrer" class="image-item">
                                         <div class="image-wrapper">
                                             <img :src="item.thumbnail" :alt="item.title" class="image-thumb" loading="lazy">
                                         </div>
@@ -259,7 +302,6 @@
                                     </a>
                                 </div>
 
-                                <!-- Video Results -->
                                 <div v-if="currentType === 'video'" class="stack-video">
                                     <article v-for="(item, index) in results" :key="index" class="result-card">
                                         <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
@@ -277,11 +319,17 @@
                                                 <span v-if="item.duration" class="meta-badge">{{ item.duration }}</span>
                                                 <span v-if="item.views" class="meta-badge">{{ formatViews(item.views) }} 回視聴</span>
                                             </div>
+                                            <button v-if="currentType === 'video'" class="pip-button" @click.prevent="togglePiP(item)">
+                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                    <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5v-9zM1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"/>
+                                                    <path d="M8 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-3z"/>
+                                                </svg>
+                                                PiP
+                                            </button>
                                         </a>
                                     </article>
                                 </div>
 
-                                <!-- News Results -->
                                 <div v-if="currentType === 'news'" class="stack-news">
                                     <article v-for="(item, index) in results" :key="index" class="result-card">
                                         <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
@@ -302,7 +350,6 @@
                             </div>
                         </transition>
 
-                        <!-- Empty State -->
                         <div v-if="!loading && !error && searchPerformed && results.length === 0" class="empty-state content-area">
                             <div class="empty-icon">
                                 <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -314,34 +361,18 @@
                             <p class="empty-description">別のキーワードをお試しください</p>
                         </div>
 
-                        <!-- Pagination -->
                         <div v-if="!loading && results.length > 0 && totalPages > 1" class="pagination content-area">
-                            <button 
-                                @click="changePage(currentPage - 1)"
-                                :disabled="currentPage === 1"
-                                class="pagination-btn"
-                            >
+                            <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-btn">
                                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="15 18 9 12 15 6"></polyline>
                                 </svg>
                             </button>
-                            
                             <div class="pagination-numbers">
-                                <button 
-                                    v-for="page in visiblePages" 
-                                    :key="page"
-                                    @click="changePage(page)"
-                                    :class="['pagination-number', { 'active': page === currentPage }]"
-                                >
+                                <button v-for="page in visiblePages" :key="page" @click="changePage(page)" :class="['pagination-number', { 'active': page === currentPage }]">
                                     {{ page }}
                                 </button>
                             </div>
-                            
-                            <button 
-                                @click="changePage(currentPage + 1)"
-                                :disabled="currentPage >= totalPages"
-                                class="pagination-btn"
-                            >
+                            <button @click="changePage(currentPage + 1)" :disabled="currentPage >= totalPages" class="pagination-btn">
                                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="9 18 15 12 9 6"></polyline>
                                 </svg>
@@ -350,12 +381,9 @@
                     </div>
                 </main>
 
-                <!-- Preview Panel (Desktop only) -->
                 <aside class="desktop-preview">
                     <div class="preview-header">プレビュー</div>
-                    <div v-if="!previewData" class="preview-placeholder">
-                        結果を選択するとプレビューが表示されます
-                    </div>
+                    <div v-if="!previewData" class="preview-placeholder">結果を選択するとプレビューが表示されます</div>
                     <div v-else class="preview-content">
                         <h3>{{ previewData.title }}</h3>
                         <p>{{ previewData.description }}</p>
@@ -365,21 +393,13 @@
             </div>
         </div>
 
-        <!-- Mobile Bottom Tab Bar -->
+        <!-- Mobile Tab Bar -->
         <nav class="tab-bar">
-            <button 
-                v-for="type in searchTypes" 
-                :key="type.value"
-                @click="changeSearchType(type.value)"
-                :class="['tab-bar-item', { 'active': currentType === type.value }]"
-            >
+            <button v-for="type in searchTypes" :key="type.value" @click="changeSearchType(type.value)" :class="['tab-bar-item', { 'active': currentType === type.value }]">
                 <div class="tab-bar-icon" v-html="type.icon"></div>
                 <span class="tab-bar-label">{{ type.label }}</span>
             </button>
-            <button 
-                @click="showSettings = !showSettings"
-                :class="['tab-bar-item', { 'active': showSettings }]"
-            >
+            <button @click="showSettings = !showSettings" :class="['tab-bar-item', { 'active': showSettings }]">
                 <div class="tab-bar-icon">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
@@ -389,6 +409,23 @@
                 <span class="tab-bar-label">設定</span>
             </button>
         </nav>
+
+        <!-- Multi-select Toolbar -->
+        <transition name="slide-up">
+            <div v-if="multiSelectCount > 0" class="multi-select-toolbar">
+                <div class="multi-select-count">{{ multiSelectCount }}件選択中</div>
+                <div class="multi-select-actions">
+                    <button class="multi-select-btn primary" @click="openAllSelected">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                            <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                        </svg>
+                        すべて開く
+                    </button>
+                    <button class="multi-select-btn secondary" @click="clearSelection">クリア</button>
+                </div>
+            </div>
+        </transition>
 
         <!-- Context Menu -->
         <div v-if="showContextMenu" class="context-menu" :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }">
@@ -416,7 +453,7 @@
             </button>
         </div>
 
-        <!-- Quick Look Overlay -->
+        <!-- Quick Look -->
         <div v-if="showQuickLook" class="quicklook-overlay" @click.self="showQuickLook = false">
             <div class="quicklook-panel">
                 <div class="quicklook-header">
@@ -433,10 +470,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- PiP Indicator -->
+        <transition name="slide-up">
+            <div v-if="pipActive" class="pip-indicator">
+                <svg class="pip-indicator-icon" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5v-9z"/>
+                </svg>
+                <span class="pip-indicator-text">PiP再生中</span>
+                <button class="pip-close" @click="exitPiP">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 3L3 9M3 3l6 6"/>
+                    </svg>
+                </button>
+            </div>
+        </transition>
     </div>
 
     <script src="js/api.js"></script>
     <script src="js/keyboard.js"></script>
+    <script src="js/advanced-features.js"></script>
 
     <script>
         const { createApp } = Vue;
@@ -444,29 +497,16 @@
         createApp({
             data() {
                 return {
-                    query: '',
-                    currentType: 'web',
-                    currentPage: 1,
-                    totalPages: 10,
-                    safesearch: 0,
-                    language: 'ja',
-                    density: 'normal',
-                    viewMode: 'list',
-                    results: [],
-                    suggestions: [],
-                    showSuggestions: false,
-                    isSearchFocused: false,
-                    loading: false,
-                    error: null,
-                    searchPerformed: false,
-                    showSettings: false,
-                    showContextMenu: false,
-                    showQuickLook: false,
-                    contextMenuX: 0,
-                    contextMenuY: 0,
-                    contextMenuItem: null,
-                    quickLookData: null,
-                    previewData: null,
+                    query: '', currentType: 'web', currentPage: 1, totalPages: 10,
+                    safesearch: 0, language: 'ja', density: 'normal', viewMode: 'list',
+                    results: [], suggestions: [], searchHistory: [],
+                    showSuggestions: false, showHistory: false, isSearchFocused: false,
+                    loading: false, error: null, searchPerformed: false, showSettings: false,
+                    showContextMenu: false, showQuickLook: false,
+                    contextMenuX: 0, contextMenuY: 0, contextMenuItem: null,
+                    quickLookData: null, previewData: null,
+                    tabs: [], activeTabId: null, nextTabId: 1,
+                    multiSelectCount: 0, pipActive: false,
                     suggestionDebounceTimer: null,
                     searchTypes: [
                         { label: 'すべて', value: 'web', icon: '<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"/></svg>' },
@@ -478,33 +518,30 @@
                         { label: 'リスト', value: 'list', icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>' },
                         { label: 'グリッド', value: 'grid', icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/></svg>' }
                     ],
-                    api: null,
-                    keyboardNav: null
+                    api: null, keyboardNav: null, historyManager: null, tabManager: null, multiSelect: null, pip: null, smoothScroll: null
                 }
             },
             computed: {
                 visiblePages() {
-                    const pages = [];
-                    const maxVisible = 5;
-                    const half = Math.floor(maxVisible / 2);
-                    
-                    let start = Math.max(1, this.currentPage - half);
-                    let end = Math.min(this.totalPages, start + maxVisible - 1);
-                    
-                    if (end - start < maxVisible - 1) {
-                        start = Math.max(1, end - maxVisible + 1);
-                    }
-                    
-                    for (let i = start; i <= end; i++) {
-                        pages.push(i);
-                    }
-                    
+                    const pages = [], maxVisible = 5, half = Math.floor(maxVisible / 2);
+                    let start = Math.max(1, this.currentPage - half), end = Math.min(this.totalPages, start + maxVisible - 1);
+                    if (end - start < maxVisible - 1) start = Math.max(1, end - maxVisible + 1);
+                    for (let i = start; i <= end; i++) pages.push(i);
                     return pages;
                 }
             },
             mounted() {
                 this.api = new WholphinAPI();
                 this.keyboardNav = new KeyboardNavigation(this);
+                this.historyManager = new SearchHistory(this);
+                this.tabManager = new TabManager(this);
+                this.multiSelect = new MultiSelect(this);
+                this.pip = new PictureInPicture();
+                this.smoothScroll = new SmoothScroll();
+                
+                this.tabs = this.tabManager.getTabs();
+                this.activeTabId = this.tabManager.activeTabId;
+                this.searchHistory = this.historyManager.getRecent();
                 
                 const urlParams = new URLSearchParams(window.location.search);
                 const urlQuery = urlParams.get('q');
@@ -512,153 +549,72 @@
                     this.query = urlQuery;
                     this.performSearch();
                 }
-
-                // Close context menu on click outside
-                document.addEventListener('click', () => {
-                    this.showContextMenu = false;
-                });
+                document.addEventListener('click', () => { this.showContextMenu = false; this.showHistory = false; });
             },
             methods: {
                 handleSearchFocus() {
                     this.isSearchFocused = true;
-                    if (this.query.trim() && this.suggestions.length > 0) {
+                    if (!this.query.trim() && this.searchHistory.length > 0) {
+                        this.showHistory = true;
+                    } else if (this.suggestions.length > 0) {
                         this.showSuggestions = true;
                     }
                 },
                 async handleSearchInput() {
-                    if (this.suggestionDebounceTimer) {
-                        clearTimeout(this.suggestionDebounceTimer);
-                    }
-                    
-                    if (!this.query.trim()) {
-                        this.suggestions = [];
-                        this.showSuggestions = false;
-                        return;
-                    }
-                    
+                    if (this.suggestionDebounceTimer) clearTimeout(this.suggestionDebounceTimer);
+                    this.showHistory = false;
+                    if (!this.query.trim()) { this.suggestions = []; this.showSuggestions = false; return; }
                     this.suggestionDebounceTimer = setTimeout(async () => {
                         try {
-                            const response = await this.api.search({
-                                q: this.query,
-                                type: 'suggest',
-                                lang: this.language
-                            });
-                            
+                            const response = await this.api.search({ q: this.query, type: 'suggest', lang: this.language });
                             this.suggestions = response.suggestions || [];
-                            if (this.isSearchFocused && this.suggestions.length > 0) {
-                                this.showSuggestions = true;
-                            }
-                        } catch (err) {
-                            console.error('Suggestion error:', err);
-                            this.suggestions = [];
-                        }
+                            if (this.isSearchFocused && this.suggestions.length > 0) this.showSuggestions = true;
+                        } catch (err) { console.error('Suggestion error:', err); this.suggestions = []; }
                     }, 300);
                 },
-                handleSearchBlur() {
-                    this.isSearchFocused = false;
-                    setTimeout(() => {
-                        this.showSuggestions = false;
-                    }, 200);
-                },
+                handleSearchBlur() { this.isSearchFocused = false; setTimeout(() => { this.showSuggestions = false; }, 200); },
                 async performSearch() {
                     if (!this.query.trim()) return;
-                    
-                    this.showSuggestions = false;
-                    this.loading = true;
-                    this.error = null;
-                    this.searchPerformed = true;
-                    this.results = [];
-                    this.keyboardNav.reset();
-
+                    this.showSuggestions = false; this.showHistory = false;
+                    this.loading = true; this.error = null; this.searchPerformed = true; this.results = [];
+                    this.keyboardNav.reset(); this.historyManager.add(this.query);
+                    this.searchHistory = this.historyManager.getRecent();
                     try {
-                        const response = await this.api.search({
-                            q: this.query,
-                            type: this.currentType,
-                            page: this.currentPage,
-                            safesearch: this.safesearch,
-                            lang: this.language
-                        });
-                        
-                        const url = new URL(window.location);
-                        url.searchParams.set('q', this.query);
-                        window.history.pushState({}, '', url);
-
+                        const response = await this.api.search({ q: this.query, type: this.currentType, page: this.currentPage, safesearch: this.safesearch, lang: this.language });
+                        const url = new URL(window.location); url.searchParams.set('q', this.query); window.history.pushState({}, '', url);
                         this.results = response.results || [];
-                        if (response.pagination) {
-                            this.totalPages = response.pagination.totalPages || 10;
-                        }
-                    } catch (err) {
-                        this.error = err instanceof WholphinAPIError ? err.message : 'ネットワークエラーが発生しました';
-                    } finally {
-                        this.loading = false;
-                    }
+                        if (response.pagination) this.totalPages = response.pagination.totalPages || 10;
+                    } catch (err) { this.error = err instanceof WholphinAPIError ? err.message : 'ネットワークエラー'; } finally { this.loading = false; }
                 },
                 changeSearchType(type) {
                     if (this.currentType === type) return;
-                    this.currentType = type;
-                    this.currentPage = 1;
-                    this.showSettings = false;
-                    if (this.query.trim() && this.searchPerformed) {
-                        this.performSearch();
-                    }
+                    this.currentType = type; this.currentPage = 1; this.showSettings = false;
+                    if (this.query.trim() && this.searchPerformed) this.performSearch();
                 },
-                changePage(page) {
-                    if (page < 1 || page > this.totalPages) return;
-                    this.currentPage = page;
-                    this.performSearch();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                },
-                selectSuggestion(suggestion) {
-                    this.query = suggestion;
-                    this.showSuggestions = false;
-                    this.suggestions = [];
-                    this.performSearch();
-                },
-                handleFaviconError(event) {
-                    event.target.style.display = 'none';
-                    const fallback = event.target.nextElementSibling;
-                    if (fallback?.classList.contains('result-favicon-fallback')) {
-                        fallback.style.display = 'flex';
-                    }
-                },
-                extractDomain(url) {
-                    try {
-                        return new URL(url).hostname.replace('www.', '');
-                    } catch {
-                        return url;
-                    }
-                },
-                formatViews(views) {
-                    if (typeof views === 'string') return views;
-                    if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M';
-                    if (views >= 1000) return (views / 1000).toFixed(1) + 'K';
-                    return views;
-                },
-                showContextMenuFor(item, event) {
-                    this.contextMenuItem = item;
-                    this.contextMenuX = event.clientX;
-                    this.contextMenuY = event.clientY;
-                    this.showContextMenu = true;
-                },
-                openInNewTab() {
-                    if (this.contextMenuItem) {
-                        window.open(this.contextMenuItem.url, '_blank', 'noopener,noreferrer');
-                    }
-                    this.showContextMenu = false;
-                },
-                copyLink() {
-                    if (this.contextMenuItem) {
-                        navigator.clipboard.writeText(this.contextMenuItem.url);
-                    }
-                    this.showContextMenu = false;
-                },
-                quickLook() {
-                    if (this.contextMenuItem) {
-                        this.quickLookData = this.contextMenuItem;
-                        this.showQuickLook = true;
-                    }
-                    this.showContextMenu = false;
-                }
+                changePage(page) { if (page < 1 || page > this.totalPages) return; this.currentPage = page; this.performSearch(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
+                selectSuggestion(suggestion) { this.query = suggestion; this.showSuggestions = false; this.suggestions = []; this.performSearch(); },
+                selectHistory(item) { this.query = item.query; this.currentType = item.type; this.showHistory = false; this.performSearch(); },
+                deleteHistory(query) { this.historyManager.remove(query); this.searchHistory = this.historyManager.getRecent(); },
+                clearHistory() { this.historyManager.clear(); this.searchHistory = []; this.showHistory = false; },
+                handleFaviconError(event) { event.target.style.display = 'none'; const fallback = event.target.nextElementSibling; if (fallback?.classList.contains('result-favicon-fallback')) fallback.style.display = 'flex'; },
+                extractDomain(url) { try { return new URL(url).hostname.replace('www.', ''); } catch { return url; } },
+                formatViews(views) { if (typeof views === 'string') return views; if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M'; if (views >= 1000) return (views / 1000).toFixed(1) + 'K'; return views; },
+                formatTimestamp(ts) { const diff = Date.now() - ts, mins = Math.floor(diff / 60000), hrs = Math.floor(diff / 3600000), days = Math.floor(diff / 86400000); if (mins < 60) return mins + '分前'; if (hrs < 24) return hrs + '時間前'; return days + '日前'; },
+                getTypeLabel(type) { const t = this.searchTypes.find(t => t.value === type); return t ? t.label : type; },
+                showContextMenuFor(item, event) { this.contextMenuItem = item; this.contextMenuX = event.clientX; this.contextMenuY = event.clientY; this.showContextMenu = true; },
+                openInNewTab() { if (this.contextMenuItem) window.open(this.contextMenuItem.url, '_blank', 'noopener,noreferrer'); this.showContextMenu = false; },
+                copyLink() { if (this.contextMenuItem) navigator.clipboard.writeText(this.contextMenuItem.url); this.showContextMenu = false; },
+                quickLook() { if (this.contextMenuItem) { this.quickLookData = this.contextMenuItem; this.showQuickLook = true; } this.showContextMenu = false; },
+                createNewTab() { const tab = this.tabManager.createTab('新規検索', true); this.tabs = this.tabManager.getTabs(); this.activeTabId = tab.id; },
+                switchTab(tabId) { this.tabManager.switchTab(tabId); this.tabs = this.tabManager.getTabs(); this.activeTabId = this.tabManager.activeTabId; },
+                closeTab(tabId) { this.tabManager.closeTab(tabId); this.tabs = this.tabManager.getTabs(); this.activeTabId = this.tabManager.activeTabId; },
+                openAllSelected() { this.multiSelect.openAllSelected(); this.multiSelectCount = 0; },
+                clearSelection() { this.multiSelect.clearSelection(); this.multiSelectCount = 0; },
+                async togglePiP(item) { if (this.pipActive) { await this.pip.exitPiP(); this.pipActive = false; } else { const success = await this.pip.requestPiP(item.url, item.title); if (success) this.pipActive = true; } },
+                async exitPiP() { await this.pip.exitPiP(); this.pipActive = false; }
+            },
+            watch: {
+                'multiSelect.selectedItems.size'(newSize) { this.multiSelectCount = newSize; }
             }
         }).mount('#app');
     </script>
