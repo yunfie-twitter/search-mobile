@@ -28,16 +28,24 @@
   --color-gray-800: #1f2937;
   --color-gray-900: #111827;
 
-  /* Semantic Colors */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
+  /* Semantic Colors - Light Mode */
+  --color-success: #059669;
+  --color-success-bg: #d1fae5;
+  --color-success-text: #065f46;
+  --color-warning: #d97706;
+  --color-warning-bg: #fef3c7;
+  --color-warning-text: #92400e;
+  --color-error: #dc2626;
+  --color-error-bg: #fee2e2;
+  --color-error-text: #991b1b;
+  --color-info: #2563eb;
+  --color-info-bg: #dbeafe;
+  --color-info-text: #1e40af;
 
-  /* Text Colors */
+  /* Text Colors - Light Mode (WCAG AAA compliant) */
   --color-text-primary: var(--color-gray-900);
-  --color-text-secondary: var(--color-gray-600);
-  --color-text-tertiary: var(--color-gray-500);
+  --color-text-secondary: var(--color-gray-700);
+  --color-text-tertiary: var(--color-gray-600);
   --color-text-disabled: var(--color-gray-400);
   --color-text-inverse: #ffffff;
 
@@ -50,7 +58,12 @@
   /* Border Colors */
   --color-border-primary: var(--color-gray-200);
   --color-border-secondary: var(--color-gray-300);
-  --color-border-focus: var(--color-primary-500);
+  --color-border-focus: var(--color-primary-600);
+
+  /* Interactive Colors - Using darker primary for better contrast */
+  --color-interactive-primary: var(--color-primary-700);
+  --color-interactive-primary-hover: var(--color-primary-800);
+  --color-interactive-primary-active: var(--color-primary-900);
 
   /* Spacing Scale */
   --space-0: 0;
@@ -75,6 +88,7 @@
   --radius-lg: 0.5rem;      /* 8px */
   --radius-xl: 0.75rem;     /* 12px */
   --radius-2xl: 1rem;       /* 16px */
+  --radius-3xl: 1.5rem;     /* 24px */
   --radius-full: 9999px;
 
   /* Shadows */
@@ -84,6 +98,7 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-focus: 0 0 0 3px rgba(3, 105, 161, 0.3);
 
   /* Z-Index Scale */
   --z-index-dropdown: 1000;
@@ -118,11 +133,35 @@
   --safe-area-inset-right: env(safe-area-inset-right, 0);
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0);
   --safe-area-inset-left: env(safe-area-inset-left, 0);
+
+  /* Content-specific spacing */
+  --space-result-web: var(--space-5);
+  --space-result-image: var(--space-6);
+  --space-result-video: var(--space-6);
+  --space-result-news: var(--space-4);
 }
 
-/* Dark Mode Support */
+/* Dark Mode Support - Complete Implementation */
 @media (prefers-color-scheme: dark) {
   :root {
+    /* Primary colors adjusted for dark mode */
+    --color-primary-600: #38bdf8;
+    --color-primary-700: #7dd3fc;
+    
+    /* Semantic Colors - Dark Mode */
+    --color-success: #10b981;
+    --color-success-bg: #064e3b;
+    --color-success-text: #6ee7b7;
+    --color-warning: #f59e0b;
+    --color-warning-bg: #78350f;
+    --color-warning-text: #fcd34d;
+    --color-error: #ef4444;
+    --color-error-bg: #7f1d1d;
+    --color-error-text: #fca5a5;
+    --color-info: #3b82f6;
+    --color-info-bg: #1e3a8a;
+    --color-info-text: #93c5fd;
+
     /* Text Colors - Dark Mode */
     --color-text-primary: #f9fafb;
     --color-text-secondary: #d1d5db;
@@ -139,5 +178,20 @@
     /* Border Colors - Dark Mode */
     --color-border-primary: #374151;
     --color-border-secondary: #4b5563;
+    --color-border-focus: var(--color-primary-600);
+
+    /* Interactive Colors - Dark Mode */
+    --color-interactive-primary: var(--color-primary-600);
+    --color-interactive-primary-hover: var(--color-primary-500);
+    --color-interactive-primary-active: var(--color-primary-400);
+
+    /* Shadows - Dark Mode */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --shadow-focus: 0 0 0 3px rgba(56, 189, 248, 0.4);
   }
 }
