@@ -3,8 +3,24 @@
  * Responsive enhancements for larger screens
  */
 
+/* Hide desktop-only elements on mobile by default */
+.desktop-sidebar,
+.desktop-toolbar,
+.desktop-preview,
+.tab-bar-container {
+  display: none;
+}
+
 /* Desktop-only styles - 1024px and above */
 @media (min-width: 1024px) {
+  /* Show desktop elements */
+  .desktop-sidebar,
+  .desktop-toolbar,
+  .desktop-preview,
+  .tab-bar-container {
+    display: flex;
+  }
+
   /* Hide mobile tab bar on desktop */
   .tab-bar {
     display: none;
@@ -28,7 +44,6 @@
     width: 220px;
     background-color: var(--color-bg-primary);
     border-right: 1px solid var(--color-border-primary);
-    display: flex;
     flex-direction: column;
     flex-shrink: 0;
     overflow-y: auto;
@@ -120,6 +135,23 @@
     overflow: hidden;
   }
 
+  /* Tab bar container */
+  .tab-bar-container {
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-8) var(--space-24);
+    background-color: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border-primary);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .tab-bar-container::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Header - macOS style toolbar */
   .mobile-header {
     position: static;
@@ -143,7 +175,6 @@
 
   /* Toolbar */
   .desktop-toolbar {
-    display: flex;
     align-items: center;
     gap: var(--space-16);
     flex: 1;
@@ -271,6 +302,7 @@
     border-left: 1px solid var(--color-border-primary);
     overflow-y: auto;
     padding: var(--space-24);
+    flex-direction: column;
   }
 
   .preview-header {
@@ -311,6 +343,20 @@
   /* Pagination centered */
   .pagination {
     justify-content: center;
+  }
+
+  /* Settings panel on desktop */
+  .settings-panel {
+    position: fixed;
+    top: 128px; /* Tab bar + header */
+    right: var(--space-24);
+    width: 320px;
+    z-index: var(--z-dropdown);
+    margin: 0;
+  }
+
+  .settings-card {
+    box-shadow: var(--shadow-4);
   }
 }
 
@@ -395,6 +441,10 @@
   margin-left: auto;
   font-size: var(--font-size-11);
   color: var(--color-text-tertiary);
+}
+
+.context-menu-item:hover .context-menu-shortcut {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .context-menu-divider {
@@ -483,36 +533,22 @@
 }
 
 /* Density options */
-.results-container.density-compact .result-card {
-  padding: var(--space-16);
-}
-
-.results-container.density-compact .result-description {
-  font-size: var(--font-size-13);
-  -webkit-line-clamp: 1;
-}
-
-.results-container.density-comfortable .result-card {
-  padding: var(--space-24);
-}
-
-.results-container.density-comfortable .result-description {
-  font-size: var(--font-size-17);
-  -webkit-line-clamp: 3;
-}
-
-/* Settings panel on desktop */
 @media (min-width: 1024px) {
-  .settings-panel {
-    position: fixed;
-    top: 64px;
-    right: var(--space-24);
-    width: 320px;
-    z-index: var(--z-dropdown);
-    margin: 0;
+  .results-container.density-compact .result-card {
+    padding: var(--space-16);
   }
 
-  .settings-card {
-    box-shadow: var(--shadow-4);
+  .results-container.density-compact .result-description {
+    font-size: var(--font-size-13);
+    -webkit-line-clamp: 1;
+  }
+
+  .results-container.density-comfortable .result-card {
+    padding: var(--space-24);
+  }
+
+  .results-container.density-comfortable .result-description {
+    font-size: var(--font-size-17);
+    -webkit-line-clamp: 3;
   }
 }
