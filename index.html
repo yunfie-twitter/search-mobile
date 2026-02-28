@@ -391,15 +391,280 @@
                 </div>
             </transition>
 
-            <!-- Search View (truncated for brevity - same as before) -->
+            <!-- Search View -->
             <transition name="fade-page">
                 <div v-if="currentView === 'search'" class="search-view">
-                    <!-- Content same as before -->
+                    <!-- Header -->
+                    <header class="mobile-header" :class="{ 'header-compact': searchPerformed }">
+                        <div class="logo-container">
+                            <div class="logo-icon">
+                                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.1"/>
+                                    <path d="M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z" fill="currentColor"/>
+                                </svg>
+                            </div>
+                            <h1 class="logo-text">Wholphin</h1>
+                        </div>
+
+                        <div class="desktop-toolbar">
+                            <div class="search-box-wrapper">
+                                <div class="search-box" @click="openMobileSearchIfMobile">
+                                    <input 
+                                        type="search" 
+                                        class="search-input desktop-only" 
+                                        v-model="query"
+                                        @input="handleSearchInput"
+                                        @keyup.enter="performSearch"
+                                        @focus="handleSearchFocus"
+                                        @blur="handleSearchBlur"
+                                        placeholder="検索"
+                                        aria-label="検索"
+                                        autocomplete="off"
+                                    >
+                                    <div class="search-input mobile-only">{{ query || '検索' }}</div>
+                                    <button class="search-button desktop-only" @click="performSearch" aria-label="検索実行">
+                                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <path d="m21 21-4.35-4.35"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <!-- Suggestions (Desktop only) -->
+                                <transition name="slide-down">
+                                    <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-dropdown desktop-only">
+                                        <button 
+                                            v-for="(suggestion, index) in suggestions" 
+                                            :key="index"
+                                            @mousedown.prevent="selectSuggestion(suggestion)"
+                                            class="suggestion-item"
+                                        >
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="suggestion-icon">
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <path d="m21 21-4.35-4.35"></path>
+                                            </svg>
+                                            <span>{{ suggestion }}</span>
+                                        </button>
+                                    </div>
+                                </transition>
+
+                                <!-- Search History (Desktop only) -->
+                                <transition name="slide-down">
+                                    <div v-if="showHistory && searchHistory.length > 0" class="search-history-dropdown desktop-only">
+                                        <div class="history-section">
+                                            <div class="history-section-title">最近の検索</div>
+                                            <button 
+                                                v-for="(item, index) in searchHistory" 
+                                                :key="index"
+                                                class="history-item"
+                                                @click="selectHistory(item)"
+                                            >
+                                                <svg class="history-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="10"/>
+                                                    <polyline points="12 6 12 12 16 14"/>
+                                                </svg>
+                                                <div class="history-text">
+                                                    <div class="history-query">{{ item.query }}</div>
+                                                    <div class="history-meta">{{ formatTimestamp(item.timestamp) }} · {{ getTypeLabel(item.type) }}</div>
+                                                </div>
+                                                <button class="history-delete" @click.stop="deleteHistory(item.query)" aria-label="削除">
+                                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M12 4L4 12M4 4l8 8"/>
+                                                    </svg>
+                                                </button>
+                                            </button>
+                                        </div>
+                                        <button class="history-clear" @click="clearHistory">履歴をクリア</button>
+                                    </div>
+                                </transition>
+                            </div>
+
+                            <div class="toolbar-group">
+                                <button 
+                                    v-for="view in viewModes" 
+                                    :key="view.value"
+                                    @click="viewMode = view.value"
+                                    :class="['toolbar-button', { 'active': viewMode === view.value }]"
+                                    :title="view.label"
+                                >
+                                    <div class="toolbar-icon" v-html="view.icon"></div>
+                                </button>
+                            </div>
+
+                            <div class="toolbar-divider"></div>
+
+                            <button class="toolbar-button" @click="toggleSettings" title="設定">
+                                <div class="toolbar-icon">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="8" cy="8" r="2"></circle>
+                                        <path d="M8 1v2m0 6v2M3.9 3.9l1.4 1.4m4.2 4.2l1.4 1.4M1 8h2m6 0h2M3.9 12.1l1.4-1.4m4.2-4.2l1.4-1.4"></path>
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </header>
+
+                    <!-- Content -->
+                    <div class="desktop-content">
+                        <main class="main-content">
+                            <div class="container">
+                                <div v-if="loading" class="content-area">
+                                    <div class="stack">
+                                        <div class="skeleton-result" v-for="i in 3" :key="i">
+                                            <div class="skeleton-header">
+                                                <div class="skeleton skeleton-favicon"></div>
+                                                <div class="skeleton skeleton-title"></div>
+                                            </div>
+                                            <div class="skeleton skeleton-description"></div>
+                                            <div class="skeleton skeleton-url"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div v-if="error" class="alert alert-warning content-area">
+                                    <div class="alert-icon">
+                                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <strong>問題が発生しました</strong>
+                                        <p class="alert-message">{{ error }}</p>
+                                    </div>
+                                </div>
+
+                                <transition name="fade" mode="out-in">
+                                    <div v-if="!loading && results.length > 0" :key="currentType" :class="['results-container', 'content-area', 'density-' + density]">
+                                        <div v-if="currentType === 'web'" class="stack-web">
+                                            <article v-for="(item, index) in results" :key="index" class="result-card" @contextmenu.prevent="showContextMenuFor(item, $event)">
+                                                <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
+                                                    <div class="result-header">
+                                                        <img 
+                                                            v-if="item.favicon" 
+                                                            :src="item.favicon" 
+                                                            :alt="item.title + ' favicon'"
+                                                            class="result-favicon"
+                                                            loading="lazy"
+                                                            @error="handleFaviconError($event)"
+                                                        >
+                                                        <div class="result-favicon-fallback" v-else>
+                                                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 0-1h5.793L8.146 4.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 7.5H4.5z"/>
+                                                            </svg>
+                                                        </div>
+                                                        <h3 class="result-title">{{ item.title }}</h3>
+                                                    </div>
+                                                    <p class="result-description">{{ item.summary || item.description }}</p>
+                                                    <p class="result-domain">{{ extractDomain(item.url) }}</p>
+                                                </a>
+                                            </article>
+                                        </div>
+
+                                        <div v-if="currentType === 'image'" class="image-grid">
+                                            <a v-for="(item, index) in results" :key="index" :href="item.url" target="_blank" rel="noopener noreferrer" class="image-item">
+                                                <div class="image-wrapper">
+                                                    <img :src="item.thumbnail" :alt="item.title" class="image-thumb" loading="lazy">
+                                                </div>
+                                                <p class="image-title">{{ item.title }}</p>
+                                            </a>
+                                        </div>
+
+                                        <div v-if="currentType === 'video'" class="stack-video">
+                                            <article v-for="(item, index) in results" :key="index" class="result-card">
+                                                <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
+                                                    <div v-if="item.thumbnail" class="video-thumbnail">
+                                                        <img :src="item.thumbnail" :alt="item.title" loading="lazy">
+                                                        <div class="video-overlay">
+                                                            <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                                                                <path d="M10.804 8 5 4.633v6.734L10.804 8z"/>
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                    <h3 class="result-title-video">{{ item.title }}</h3>
+                                                    <p class="result-description">{{ item.summary || item.description }}</p>
+                                                    <div class="video-meta" v-if="item.duration || item.views">
+                                                        <span v-if="item.duration" class="meta-badge">{{ item.duration }}</span>
+                                                        <span v-if="item.views" class="meta-badge">{{ formatViews(item.views) }} 回視聴</span>
+                                                    </div>
+                                                    <button v-if="currentType === 'video'" class="pip-button" @click.prevent="togglePiP(item)">
+                                                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                            <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5v-9zM1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"/>
+                                                            <path d="M8 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-3z"/>
+                                                        </svg>
+                                                        PiP
+                                                    </button>
+                                                </a>
+                                            </article>
+                                        </div>
+
+                                        <div v-if="currentType === 'news'" class="stack-news">
+                                            <article v-for="(item, index) in results" :key="index" class="result-card">
+                                                <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
+                                                    <div class="news-content">
+                                                        <div class="news-text">
+                                                            <h3 class="result-title-news">{{ item.title }}</h3>
+                                                            <p class="result-description">{{ item.summary || item.description }}</p>
+                                                            <div class="news-meta" v-if="item.source || item.date">
+                                                                <span v-if="item.source" class="meta-source">{{ item.source }}</span>
+                                                                <span v-if="item.date" class="meta-date">{{ item.date }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.title" class="news-thumbnail" loading="lazy">
+                                                    </div>
+                                                </a>
+                                            </article>
+                                        </div>
+                                    </div>
+                                </transition>
+
+                                <div v-if="!loading && !error && searchPerformed && results.length === 0" class="empty-state content-area">
+                                    <div class="empty-icon">
+                                        <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="32" cy="32" r="28"></circle>
+                                            <path d="m52 52-8-8"></path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="empty-title">検索結果が見つかりませんでした</h3>
+                                    <p class="empty-description">別のキーワードをお試しください</p>
+                                </div>
+
+                                <div v-if="!loading && results.length > 0 && totalPages > 1" class="pagination content-area">
+                                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-btn">
+                                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="15 18 9 12 15 6"></polyline>
+                                        </svg>
+                                    </button>
+                                    <div class="pagination-numbers">
+                                        <button v-for="page in visiblePages" :key="page" @click="changePage(page)" :class="['pagination-number', { 'active': page === currentPage }]">
+                                            {{ page }}
+                                        </button>
+                                    </div>
+                                    <button @click="changePage(currentPage + 1)" :disabled="currentPage >= totalPages" class="pagination-btn">
+                                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </main>
+
+                        <aside class="desktop-preview">
+                            <div class="preview-header">プレビュー</div>
+                            <div v-if="!previewData" class="preview-placeholder">結果を選択するとプレビューが表示されます</div>
+                            <div v-else class="preview-content">
+                                <h3>{{ previewData.title }}</h3>
+                                <p>{{ previewData.description }}</p>
+                                <a :href="previewData.url" target="_blank" class="btn btn-primary">開く</a>
+                            </div>
+                        </aside>
+                    </div>
                 </div>
             </transition>
         </div>
 
-        <!-- Mobile Tab Bar with Better Icons -->
+        <!-- Mobile Tab Bar -->
         <nav class="tab-bar" v-show="currentView !== 'settings' && !showMobileSearch">
             <button 
                 v-for="type in searchTypes" 
