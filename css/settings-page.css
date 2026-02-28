@@ -1,0 +1,293 @@
+/* Settings Page Styles - Apple-inspired */
+
+.settings-page {
+    min-height: 100vh;
+    background: var(--color-background);
+    overflow-y: auto;
+}
+
+.settings-container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+/* Header */
+.settings-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    animation: fadeInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-back {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.settings-back:hover {
+    background: var(--color-hover);
+    border-color: var(--color-primary);
+}
+
+.settings-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+/* Content */
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.settings-section {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.settings-section:nth-child(1) { animation-delay: 0.05s; }
+.settings-section:nth-child(2) { animation-delay: 0.1s; }
+.settings-section:nth-child(3) { animation-delay: 0.15s; }
+.settings-section:nth-child(4) { animation-delay: 0.2s; }
+
+.settings-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0 0 0.75rem;
+    letter-spacing: -0.01em;
+}
+
+/* Card Group */
+.settings-card-group {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--color-shadow) 6%, transparent);
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.125rem 1.25rem;
+    transition: background-color 0.15s;
+}
+
+.settings-item:hover {
+    background: var(--color-hover);
+}
+
+.settings-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: 0 1.25rem;
+}
+
+.settings-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.settings-item-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text);
+    display: block;
+}
+
+.settings-item-description {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Input Elements */
+.settings-input {
+    min-width: 140px;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-background);
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    color: var(--color-text);
+    font-family: inherit;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.settings-input:hover {
+    border-color: var(--color-primary);
+}
+
+.settings-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+/* Toggle Switch */
+.settings-toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.settings-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.settings-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-border);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 28px;
+}
+
+.settings-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.settings-toggle input:checked + .settings-toggle-slider {
+    background-color: var(--color-primary);
+}
+
+.settings-toggle input:checked + .settings-toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.settings-toggle:hover .settings-toggle-slider {
+    background-color: color-mix(in srgb, var(--color-border) 80%, var(--color-text));
+}
+
+.settings-toggle input:checked:hover + .settings-toggle-slider {
+    background-color: color-mix(in srgb, var(--color-primary) 90%, var(--color-text));
+}
+
+/* Buttons */
+.settings-button-danger {
+    padding: 0.5rem 1rem;
+    background: color-mix(in srgb, #ff3b30 10%, transparent);
+    border: 1.5px solid #ff3b30;
+    border-radius: 8px;
+    color: #ff3b30;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.settings-button-danger:hover {
+    background: #ff3b30;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px color-mix(in srgb, #ff3b30 30%, transparent);
+}
+
+.settings-button-danger:active {
+    transform: translateY(0);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .settings-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .settings-title {
+        font-size: 1.75rem;
+    }
+
+    .settings-section-title {
+        font-size: 1.125rem;
+    }
+
+    .settings-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .settings-input {
+        width: 100%;
+    }
+
+    .settings-button-danger {
+        width: 100%;
+    }
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+    .settings-card-group {
+        box-shadow: 0 1px 3px color-mix(in srgb, var(--color-shadow) 12%, transparent);
+    }
+
+    .settings-toggle-slider:before {
+        background-color: var(--color-surface);
+    }
+}
