@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="css/advanced-features.css">
     <link rel="stylesheet" href="css/start-page.css">
     <link rel="stylesheet" href="css/settings-page.css">
+    <link rel="stylesheet" href="css/mobile-search.css">
     
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
@@ -29,6 +30,100 @@
 </head>
 <body>
     <div id="app">
+        <!-- Mobile Search Overlay -->
+        <transition name="slide-up-full">
+            <div v-if="showMobileSearch" class="mobile-search-overlay" @touchmove.prevent>
+                <div class="mobile-search-header">
+                    <button class="mobile-search-back" @click="closeMobileSearch">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <div class="mobile-search-input-wrapper">
+                        <input 
+                            type="search" 
+                            class="mobile-search-input" 
+                            v-model="query"
+                            @input="handleMobileSearchInput"
+                            @keyup.enter="performMobileSearch"
+                            placeholder="検索"
+                            ref="mobileSearchInput"
+                            autocomplete="off"
+                        >
+                    </div>
+                    <button v-if="query" class="mobile-search-clear" @click="clearMobileSearch">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="mobile-search-content" ref="mobileSearchContent">
+                    <!-- Suggestions -->
+                    <div v-if="mobileSuggestions.length > 0 && query" class="mobile-search-section">
+                        <div class="mobile-search-section-title">検索候補</div>
+                        <div class="mobile-search-list">
+                            <button 
+                                v-for="(suggestion, index) in mobileSuggestions" 
+                                :key="'sug-' + index"
+                                @click="selectMobileSuggestion(suggestion)"
+                                class="mobile-search-item"
+                            >
+                                <svg class="mobile-search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="10" cy="10" r="7"/>
+                                    <path d="M16 16l-3-3"/>
+                                </svg>
+                                <span class="mobile-search-text">{{ suggestion }}</span>
+                                <svg class="mobile-search-arrow" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 4l4 6-4 6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search History -->
+                    <div v-if="searchHistory.length > 0 && !query" class="mobile-search-section">
+                        <div class="mobile-search-section-header">
+                            <div class="mobile-search-section-title">最近の検索</div>
+                            <button class="mobile-search-clear-all" @click="clearHistory">すべて削除</button>
+                        </div>
+                        <div class="mobile-search-list">
+                            <button 
+                                v-for="(item, index) in searchHistory" 
+                                :key="'hist-' + index"
+                                @click="selectMobileHistory(item)"
+                                class="mobile-search-item"
+                            >
+                                <svg class="mobile-search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="10" cy="10" r="8"/>
+                                    <path d="M10 5v5l3 2"/>
+                                </svg>
+                                <div class="mobile-search-text-wrapper">
+                                    <span class="mobile-search-text">{{ item.query }}</span>
+                                    <span class="mobile-search-meta">{{ getTypeLabel(item.type) }}</span>
+                                </div>
+                                <button class="mobile-search-delete" @click.stop="deleteHistory(item.query)">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14 4L4 14M4 4l10 10"/>
+                                    </svg>
+                                </button>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-if="searchHistory.length === 0 && !query" class="mobile-search-empty">
+                        <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="32" cy="32" r="28"/>
+                            <path d="M46 46l-8-8"/>
+                        </svg>
+                        <p>検索履歴がありません</p>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
         <!-- Desktop Sidebar -->
         <aside class="desktop-sidebar" v-show="currentView !== 'settings'">
             <div class="sidebar-logo">
@@ -116,7 +211,7 @@
                         </div>
 
                         <div class="start-search-section">
-                            <div class="start-search-box">
+                            <div class="start-search-box" @click="openMobileSearch">
                                 <div class="start-search-icon">
                                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
@@ -125,7 +220,7 @@
                                 </div>
                                 <input 
                                     type="search" 
-                                    class="start-search-input" 
+                                    class="start-search-input desktop-only" 
                                     v-model="query"
                                     @keyup.enter="performSearchFromStart"
                                     @focus="handleStartSearchFocus"
@@ -135,11 +230,12 @@
                                     autocomplete="off"
                                     ref="startSearchInput"
                                 >
+                                <div class="start-search-input mobile-only">何でも検索</div>
                             </div>
 
-                            <!-- Start Page Suggestions -->
+                            <!-- Start Page Suggestions (Desktop only) -->
                             <transition name="slide-fade">
-                                <div v-if="showSuggestions && suggestions.length > 0" class="start-suggestions">
+                                <div v-if="showSuggestions && suggestions.length > 0" class="start-suggestions desktop-only">
                                     <button 
                                         v-for="(suggestion, index) in suggestions" 
                                         :key="index"
@@ -246,7 +342,7 @@
                                             <p class="settings-item-description">滑らかな動きと効果</p>
                                         </div>
                                         <label class="settings-toggle">
-                                            <input type="checkbox" v-model="animationsEnabled">
+                                            <input type="checkbox" v-model="animationsEnabled" @change="toggleAnimations">
                                             <span class="settings-toggle-slider"></span>
                                         </label>
                                     </div>
@@ -310,10 +406,10 @@
 
                         <div class="desktop-toolbar">
                             <div class="search-box-wrapper">
-                                <div class="search-box">
+                                <div class="search-box" @click="openMobileSearchIfMobile">
                                     <input 
                                         type="search" 
-                                        class="search-input" 
+                                        class="search-input desktop-only" 
                                         v-model="query"
                                         @input="handleSearchInput"
                                         @keyup.enter="performSearch"
@@ -323,7 +419,8 @@
                                         aria-label="検索"
                                         autocomplete="off"
                                     >
-                                    <button class="search-button" @click="performSearch" aria-label="検索実行">
+                                    <div class="search-input mobile-only">{{ query || '検索' }}</div>
+                                    <button class="search-button desktop-only" @click="performSearch" aria-label="検索実行">
                                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                             <circle cx="11" cy="11" r="8"></circle>
                                             <path d="m21 21-4.35-4.35"></path>
@@ -331,9 +428,9 @@
                                     </button>
                                 </div>
                                 
-                                <!-- Suggestions -->
+                                <!-- Suggestions (Desktop only) -->
                                 <transition name="slide-down">
-                                    <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-dropdown">
+                                    <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-dropdown desktop-only">
                                         <button 
                                             v-for="(suggestion, index) in suggestions" 
                                             :key="index"
@@ -349,9 +446,9 @@
                                     </div>
                                 </transition>
 
-                                <!-- Search History -->
+                                <!-- Search History (Desktop only) -->
                                 <transition name="slide-down">
-                                    <div v-if="showHistory && searchHistory.length > 0" class="search-history-dropdown">
+                                    <div v-if="showHistory && searchHistory.length > 0" class="search-history-dropdown desktop-only">
                                         <div class="history-section">
                                             <div class="history-section-title">最近の検索</div>
                                             <button 
@@ -566,7 +663,7 @@
         </div>
 
         <!-- Mobile Tab Bar -->
-        <nav class="tab-bar" v-show="currentView !== 'settings'">
+        <nav class="tab-bar" v-show="currentView !== 'settings' && !showMobileSearch">
             <button v-for="type in searchTypes" :key="type.value" @click="changeSearchType(type.value)" :class="['tab-bar-item', { 'active': currentType === type.value && currentView === 'search' }]">
                 <div class="tab-bar-icon" v-html="type.icon"></div>
                 <span class="tab-bar-label">{{ type.label }}</span>
@@ -639,6 +736,10 @@
                     currentView: 'start',
                     animationsEnabled: true,
                     suggestionsEnabled: true,
+                    showMobileSearch: false,
+                    mobileSuggestions: [],
+                    mobileSearchDebounceTimer: null,
+                    isMobile: false,
                     searchTypes: [
                         { label: 'すべて', value: 'web', icon: '<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"/></svg>' },
                         { label: '画像', value: 'image', icon: '<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>' },
@@ -662,6 +763,11 @@
                 }
             },
             mounted() {
+                this.isMobile = window.innerWidth < 768;
+                window.addEventListener('resize', () => {
+                    this.isMobile = window.innerWidth < 768;
+                });
+
                 this.api = new WholphinAPI();
                 this.keyboardNav = new KeyboardNavigation(this);
                 this.historyManager = new SearchHistory(this);
@@ -670,17 +776,7 @@
                 this.pip = new PictureInPicture();
                 
                 if (this.animationsEnabled && typeof Lenis !== 'undefined') {
-                    this.lenis = new Lenis({
-                        duration: 1.2,
-                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                        smoothWheel: true,
-                        smoothTouch: false
-                    });
-                    const raf = (time) => {
-                        this.lenis.raf(time);
-                        requestAnimationFrame(raf);
-                    }
-                    requestAnimationFrame(raf);
+                    this.initLenis();
                 }
                 
                 if (this.animationsEnabled && typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
@@ -702,6 +798,92 @@
                 document.addEventListener('click', () => { this.showContextMenu = false; this.showHistory = false; });
             },
             methods: {
+                initLenis() {
+                    this.lenis = new Lenis({
+                        duration: 1.2,
+                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                        smoothWheel: true,
+                        smoothTouch: false,
+                        touchMultiplier: 2
+                    });
+                    const raf = (time) => {
+                        this.lenis.raf(time);
+                        requestAnimationFrame(raf);
+                    }
+                    requestAnimationFrame(raf);
+                },
+                destroyLenis() {
+                    if (this.lenis) {
+                        this.lenis.destroy();
+                        this.lenis = null;
+                    }
+                },
+                toggleAnimations() {
+                    if (this.animationsEnabled) {
+                        if (!this.lenis && typeof Lenis !== 'undefined') {
+                            this.initLenis();
+                        }
+                    } else {
+                        this.destroyLenis();
+                        if (this.animationController) {
+                            this.animationController.setEnabled(false);
+                        }
+                    }
+                },
+                openMobileSearch() {
+                    if (!this.isMobile) return;
+                    this.showMobileSearch = true;
+                    this.$nextTick(() => {
+                        if (this.$refs.mobileSearchInput) {
+                            this.$refs.mobileSearchInput.focus();
+                        }
+                    });
+                },
+                openMobileSearchIfMobile() {
+                    if (this.isMobile) {
+                        this.openMobileSearch();
+                    }
+                },
+                closeMobileSearch() {
+                    this.showMobileSearch = false;
+                    this.mobileSuggestions = [];
+                },
+                clearMobileSearch() {
+                    this.query = '';
+                    this.mobileSuggestions = [];
+                },
+                async handleMobileSearchInput() {
+                    if (this.mobileSearchDebounceTimer) clearTimeout(this.mobileSearchDebounceTimer);
+                    if (!this.query.trim() || !this.suggestionsEnabled) { 
+                        this.mobileSuggestions = []; 
+                        return; 
+                    }
+                    this.mobileSearchDebounceTimer = setTimeout(async () => {
+                        try {
+                            const response = await this.api.search({ q: this.query, type: 'suggest', lang: this.language });
+                            this.mobileSuggestions = response.suggestions || [];
+                        } catch (err) { 
+                            console.error('Mobile suggestion error:', err); 
+                            this.mobileSuggestions = []; 
+                        }
+                    }, 300);
+                },
+                selectMobileSuggestion(suggestion) {
+                    this.query = suggestion;
+                    this.mobileSuggestions = [];
+                    this.performMobileSearch();
+                },
+                selectMobileHistory(item) {
+                    this.query = item.query;
+                    this.currentType = item.type;
+                    this.performMobileSearch();
+                },
+                performMobileSearch() {
+                    if (!this.query.trim()) return;
+                    this.closeMobileSearch();
+                    this.currentView = 'search';
+                    this.performSearch();
+                },
                 toggleSettings() {
                     if (this.currentView === 'settings') {
                         this.currentView = this.searchPerformed ? 'search' : 'start';
@@ -719,12 +901,20 @@
                     }
                 },
                 handleStartSearchFocus() {
+                    if (this.isMobile) {
+                        this.openMobileSearch();
+                        return;
+                    }
                     this.isSearchFocused = true;
                     if (this.suggestionsEnabled && this.suggestions.length > 0) {
                         this.showSuggestions = true;
                     }
                 },
                 handleSearchFocus() {
+                    if (this.isMobile) {
+                        this.openMobileSearch();
+                        return;
+                    }
                     this.isSearchFocused = true;
                     if (!this.query.trim() && this.searchHistory.length > 0) {
                         this.showHistory = true;

@@ -1,0 +1,295 @@
+/* Mobile Search Overlay - iOS/Android inspired */
+
+.mobile-search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--color-background);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Header */
+.mobile-search-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: env(safe-area-inset-top, 0) 1rem 0.75rem;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--color-shadow) 6%, transparent);
+}
+
+.mobile-search-back {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--color-primary);
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+}
+
+.mobile-search-back:active {
+    background: var(--color-hover);
+}
+
+.mobile-search-input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.mobile-search-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 1rem;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 1.0625rem;
+    color: var(--color-text);
+    outline: none;
+    transition: all 0.2s;
+}
+
+.mobile-search-input:focus {
+    border-color: var(--color-primary);
+    background: var(--color-surface);
+}
+
+.mobile-search-clear {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+}
+
+.mobile-search-clear:active {
+    background: var(--color-hover);
+}
+
+/* Content */
+.mobile-search-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.mobile-search-section {
+    padding: 1.25rem 0;
+}
+
+.mobile-search-section:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.mobile-search-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem 0.75rem;
+}
+
+.mobile-search-section-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    padding: 0 1rem 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.mobile-search-clear-all {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.mobile-search-clear-all:active {
+    opacity: 0.6;
+}
+
+/* List Items */
+.mobile-search-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-search-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--color-text);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    min-height: 56px;
+}
+
+.mobile-search-item:active {
+    background: var(--color-hover);
+}
+
+.mobile-search-icon {
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+}
+
+.mobile-search-text-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.mobile-search-text {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mobile-search-meta {
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+}
+
+.mobile-search-arrow {
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+}
+
+.mobile-search-delete {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.15s;
+    flex-shrink: 0;
+}
+
+.mobile-search-delete:active {
+    background: color-mix(in srgb, #ff3b30 15%, transparent);
+    color: #ff3b30;
+}
+
+/* Empty State */
+.mobile-search-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem 2rem;
+    color: var(--color-text-tertiary);
+    text-align: center;
+}
+
+.mobile-search-empty svg {
+    opacity: 0.4;
+}
+
+.mobile-search-empty p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Transitions */
+.slide-up-full-enter-active {
+    animation: slideUpFull 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-up-full-leave-active {
+    animation: slideUpFull 0.25s cubic-bezier(0.4, 0, 0.6, 1) reverse;
+}
+
+@keyframes slideUpFull {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* Utility Classes */
+.desktop-only {
+    display: block !important;
+}
+
+.mobile-only {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .desktop-only {
+        display: none !important;
+    }
+    
+    .mobile-only {
+        display: block !important;
+    }
+
+    .start-search-box,
+    .search-box {
+        cursor: pointer;
+    }
+
+    .start-search-input.mobile-only,
+    .search-input.mobile-only {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        color: var(--color-text-tertiary);
+        font-size: 1.0625rem;
+        pointer-events: none;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .mobile-search-overlay {
+        background: var(--color-background);
+    }
+
+    .mobile-search-header {
+        background: var(--color-surface);
+        box-shadow: 0 1px 3px color-mix(in srgb, var(--color-shadow) 15%, transparent);
+    }
+}
