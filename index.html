@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Wholphin Search - プライバシーを重視したモバイル検索エンジン">
-    <meta name="theme-color" content="#0369a1">
+    <meta name="theme-color" content="#007AFF">
     <title>Wholphin Search</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%230369a1'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
-    <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%230369a1'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%230369a1'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23007AFF'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23007AFF'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/normalize.css">
@@ -26,280 +25,277 @@
 </head>
 <body>
     <div id="app">
-        <!-- Header -->
+        <!-- Header - Simplified, no settings button -->
         <header class="mobile-header" :class="{ 'header-compact': searchPerformed }">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <!-- Logo Icon -->
-                    <div class="logo-icon">
-                        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.1"/>
-                            <path d="M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z" fill="currentColor"/>
-                        </svg>
-                    </div>
-                    <h1 class="logo-text">Wholphin Search</h1>
-                </div>
-                <button class="btn-icon btn-primary-subtle" @click="showSettings = !showSettings" aria-label="設定">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.1"/>
+                        <path d="M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z" fill="currentColor"/>
                     </svg>
-                </button>
+                </div>
+                <h1 class="logo-text">Wholphin</h1>
             </div>
         </header>
 
         <!-- Main Content -->
-        <main class="container py-4">
-            <!-- Search Box with Autocomplete -->
-            <div class="search-box-wrapper mb-6">
-                <div class="search-box" :class="{ 'search-box-focused': isSearchFocused }">
-                    <input 
-                        type="search" 
-                        class="search-input" 
-                        v-model="query"
-                        @input="handleSearchInput"
-                        @keyup.enter="performSearch"
-                        @focus="handleSearchFocus"
-                        @blur="handleSearchBlur"
-                        placeholder="何をお探しですか？🐬"
-                        aria-label="検索"
-                        autocomplete="off"
-                    >
-                    <button class="search-button" @click="performSearch" aria-label="検索実行">
-                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.35-4.35"></path>
-                        </svg>
-                    </button>
-                </div>
-                
-                <!-- Suggestions Dropdown -->
-                <transition name="slide-down">
-                    <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-dropdown">
-                        <button 
-                            v-for="(suggestion, index) in suggestions" 
-                            :key="index"
-                            @mousedown.prevent="selectSuggestion(suggestion)"
-                            class="suggestion-item"
+        <main class="main-content">
+            <div class="container">
+                <!-- Search Box with Autocomplete -->
+                <div class="search-box-wrapper">
+                    <div class="search-box" :class="{ 'search-box-focused': isSearchFocused }">
+                        <input 
+                            type="search" 
+                            class="search-input" 
+                            v-model="query"
+                            @input="handleSearchInput"
+                            @keyup.enter="performSearch"
+                            @focus="handleSearchFocus"
+                            @blur="handleSearchBlur"
+                            placeholder="検索"
+                            aria-label="検索"
+                            autocomplete="off"
                         >
-                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="suggestion-icon">
+                        <button class="search-button" @click="performSearch" aria-label="検索実行">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <path d="m21 21-4.35-4.35"></path>
                             </svg>
-                            <span>{{ suggestion }}</span>
                         </button>
                     </div>
-                </transition>
-            </div>
-
-            <!-- Search Type Tabs with Icons -->
-            <div class="tabs-wrapper mb-6">
-                <div class="tabs-container">
-                    <button 
-                        v-for="type in searchTypes" 
-                        :key="type.value"
-                        @click="changeSearchType(type.value)"
-                        :class="['tab-item', { 'tab-active': currentType === type.value }]"
-                    >
-                        <span v-html="type.icon" class="tab-icon"></span>
-                        <span class="tab-label">{{ type.label }}</span>
-                    </button>
-                </div>
-                <div class="tabs-fade-left"></div>
-                <div class="tabs-fade-right"></div>
-            </div>
-
-            <!-- Settings Panel -->
-            <transition name="slide-down">
-                <div v-if="showSettings" class="card mb-6 settings-panel">
-                    <div class="card-header">🔧 検索設定</div>
-                    <div class="card-body stack-sm">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">セーフサーチ</label>
-                            <select v-model.number="safesearch" class="input input-sm">
-                                <option :value="0">無効</option>
-                                <option :value="1">標準</option>
-                                <option :value="2">厳格</option>
-                            </select>
+                    
+                    <!-- Suggestions Dropdown -->
+                    <transition name="slide-down">
+                        <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-dropdown">
+                            <button 
+                                v-for="(suggestion, index) in suggestions" 
+                                :key="index"
+                                @mousedown.prevent="selectSuggestion(suggestion)"
+                                class="suggestion-item"
+                            >
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="suggestion-icon">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.35-4.35"></path>
+                                </svg>
+                                <span>{{ suggestion }}</span>
+                            </button>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">言語</label>
-                            <select v-model="language" class="input input-sm">
-                                <option value="ja">日本語</option>
-                                <option value="en">English</option>
-                            </select>
-                        </div>
-                    </div>
+                    </transition>
                 </div>
-            </transition>
 
-            <!-- Loading State with Detailed Skeleton -->
-            <div v-if="loading">
-                <div class="stack">
-                    <div class="skeleton-result" v-for="i in 3" :key="i">
-                        <div class="skeleton-header">
-                            <div class="skeleton skeleton-favicon"></div>
-                            <div class="skeleton skeleton-title"></div>
-                        </div>
-                        <div class="skeleton skeleton-description"></div>
-                        <div class="skeleton skeleton-url"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Error State -->
-            <div v-if="error" class="alert alert-warning mb-6">
-                <div class="alert-icon">⚠️</div>
-                <div>
-                    <strong>問題が発生しました</strong>
-                    <p class="text-sm mt-1">{{ error }}</p>
-                </div>
-            </div>
-
-            <!-- Results -->
-            <transition name="fade" mode="out-in">
-                <div v-if="!loading && results.length > 0" :key="currentType" class="results-container">
-                    <!-- Web Results with Favicon -->
-                    <div v-if="currentType === 'web'" class="stack-web">
-                        <article v-for="(item, index) in results" :key="index" class="result-card">
-                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
-                                <div class="result-header">
-                                    <img 
-                                        v-if="item.favicon" 
-                                        :src="item.favicon" 
-                                        :alt="item.title + ' favicon'"
-                                        class="result-favicon"
-                                        loading="lazy"
-                                        @error="handleFaviconError($event)"
-                                    >
-                                    <div class="result-favicon-fallback" v-else>
-                                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 0-1h5.793L8.146 4.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 7.5H4.5z"/>
-                                        </svg>
-                                    </div>
-                                    <h3 class="result-title">{{ item.title }}</h3>
-                                </div>
-                                <p class="result-description">{{ item.summary || item.description }}</p>
-                                <p class="result-domain">{{ extractDomain(item.url) }}</p>
-                            </a>
-                        </article>
-                    </div>
-
-                    <!-- Image Results -->
-                    <div v-if="currentType === 'image'" class="image-grid">
-                        <a 
-                            v-for="(item, index) in results" 
-                            :key="index" 
-                            :href="item.url" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            class="image-item"
-                        >
-                            <div class="image-wrapper">
-                                <img :src="item.thumbnail" :alt="item.title" class="image-thumb" loading="lazy">
+                <!-- Settings Panel -->
+                <transition name="slide-down">
+                    <div v-if="showSettings" class="settings-panel">
+                        <div class="settings-card">
+                            <div class="settings-group">
+                                <label class="settings-label">セーフサーチ</label>
+                                <select v-model.number="safesearch" class="settings-select">
+                                    <option :value="0">無効</option>
+                                    <option :value="1">標準</option>
+                                    <option :value="2">厳格</option>
+                                </select>
                             </div>
-                            <p class="image-title">{{ item.title }}</p>
-                        </a>
+                            <div class="settings-group">
+                                <label class="settings-label">言語</label>
+                                <select v-model="language" class="settings-select">
+                                    <option value="ja">日本語</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
+                </transition>
 
-                    <!-- Video Results -->
-                    <div v-if="currentType === 'video'" class="stack-video">
-                        <article v-for="(item, index) in results" :key="index" class="result-card">
-                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
-                                <div v-if="item.thumbnail" class="video-thumbnail">
-                                    <img :src="item.thumbnail" :alt="item.title" loading="lazy">
-                                    <div class="video-overlay">▶</div>
+                <!-- Loading State with Detailed Skeleton -->
+                <div v-if="loading" class="content-area">
+                    <div class="stack">
+                        <div class="skeleton-result" v-for="i in 3" :key="i">
+                            <div class="skeleton-header">
+                                <div class="skeleton skeleton-favicon"></div>
+                                <div class="skeleton skeleton-title"></div>
+                            </div>
+                            <div class="skeleton skeleton-description"></div>
+                            <div class="skeleton skeleton-url"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div v-if="error" class="alert alert-warning content-area">
+                    <div class="alert-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <strong>問題が発生しました</strong>
+                        <p class="alert-message">{{ error }}</p>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <transition name="fade" mode="out-in">
+                    <div v-if="!loading && results.length > 0" :key="currentType" class="results-container content-area">
+                        <!-- Web Results -->
+                        <div v-if="currentType === 'web'" class="stack-web">
+                            <article v-for="(item, index) in results" :key="index" class="result-card">
+                                <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
+                                    <div class="result-header">
+                                        <img 
+                                            v-if="item.favicon" 
+                                            :src="item.favicon" 
+                                            :alt="item.title + ' favicon'"
+                                            class="result-favicon"
+                                            loading="lazy"
+                                            @error="handleFaviconError($event)"
+                                        >
+                                        <div class="result-favicon-fallback" v-else>
+                                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 0-1h5.793L8.146 4.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 7.5H4.5z"/>
+                                            </svg>
+                                        </div>
+                                        <h3 class="result-title">{{ item.title }}</h3>
+                                    </div>
+                                    <p class="result-description">{{ item.summary || item.description }}</p>
+                                    <p class="result-domain">{{ extractDomain(item.url) }}</p>
+                                </a>
+                            </article>
+                        </div>
+
+                        <!-- Image Results -->
+                        <div v-if="currentType === 'image'" class="image-grid">
+                            <a 
+                                v-for="(item, index) in results" 
+                                :key="index" 
+                                :href="item.url" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                class="image-item"
+                            >
+                                <div class="image-wrapper">
+                                    <img :src="item.thumbnail" :alt="item.title" class="image-thumb" loading="lazy">
                                 </div>
-                                <h3 class="result-title-video">{{ item.title }}</h3>
-                                <p class="result-description">{{ item.summary || item.description }}</p>
-                                <div class="video-meta">
-                                    <span v-if="item.duration" class="meta-badge">⏱ {{ item.duration }}</span>
-                                    <span v-if="item.views" class="meta-badge">👁 {{ formatViews(item.views) }}</span>
-                                </div>
+                                <p class="image-title">{{ item.title }}</p>
                             </a>
-                        </article>
-                    </div>
+                        </div>
 
-                    <!-- News Results -->
-                    <div v-if="currentType === 'news'" class="stack-news">
-                        <article v-for="(item, index) in results" :key="index" class="result-card">
-                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
-                                <div class="news-content">
-                                    <div class="news-text">
-                                        <h3 class="result-title-news">{{ item.title }}</h3>
-                                        <p class="result-description">{{ item.summary || item.description }}</p>
-                                        <div class="news-meta">
-                                            <span v-if="item.source" class="meta-source">📰 {{ item.source }}</span>
-                                            <span v-if="item.date" class="meta-date">{{ item.date }}</span>
+                        <!-- Video Results -->
+                        <div v-if="currentType === 'video'" class="stack-video">
+                            <article v-for="(item, index) in results" :key="index" class="result-card">
+                                <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
+                                    <div v-if="item.thumbnail" class="video-thumbnail">
+                                        <img :src="item.thumbnail" :alt="item.title" loading="lazy">
+                                        <div class="video-overlay">
+                                            <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
+                                                <path d="M10.804 8 5 4.633v6.734L10.804 8z"/>
+                                            </svg>
                                         </div>
                                     </div>
-                                    <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.title" class="news-thumbnail" loading="lazy">
-                                </div>
-                            </a>
-                        </article>
+                                    <h3 class="result-title-video">{{ item.title }}</h3>
+                                    <p class="result-description">{{ item.summary || item.description }}</p>
+                                    <div class="video-meta" v-if="item.duration || item.views">
+                                        <span v-if="item.duration" class="meta-badge">{{ item.duration }}</span>
+                                        <span v-if="item.views" class="meta-badge">{{ formatViews(item.views) }} 回視聴</span>
+                                    </div>
+                                </a>
+                            </article>
+                        </div>
+
+                        <!-- News Results -->
+                        <div v-if="currentType === 'news'" class="stack-news">
+                            <article v-for="(item, index) in results" :key="index" class="result-card">
+                                <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
+                                    <div class="news-content">
+                                        <div class="news-text">
+                                            <h3 class="result-title-news">{{ item.title }}</h3>
+                                            <p class="result-description">{{ item.summary || item.description }}</p>
+                                            <div class="news-meta" v-if="item.source || item.date">
+                                                <span v-if="item.source" class="meta-source">{{ item.source }}</span>
+                                                <span v-if="item.date" class="meta-date">{{ item.date }}</span>
+                                            </div>
+                                        </div>
+                                        <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.title" class="news-thumbnail" loading="lazy">
+                                    </div>
+                                </a>
+                            </article>
+                        </div>
                     </div>
-                </div>
-            </transition>
+                </transition>
 
-            <!-- Empty State -->
-            <div v-if="!loading && !error && searchPerformed && results.length === 0" class="empty-state">
-                <div class="empty-icon">🔍</div>
-                <h3 class="empty-title">検索結果が見つかりませんでした</h3>
-                <p class="empty-description">別のキーワードをお試しください</p>
-                <div class="empty-suggestions">
-                    <p class="text-sm text-secondary mb-2">検索のコツ:</p>
-                    <ul class="empty-tips">
-                        <li>キーワードを変更してみる</li>
-                        <li>一般的な言葉を使う</li>
-                        <li>スペルを確認する</li>
-                    </ul>
+                <!-- Empty State -->
+                <div v-if="!loading && !error && searchPerformed && results.length === 0" class="empty-state content-area">
+                    <div class="empty-icon">
+                        <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="32" cy="32" r="28"></circle>
+                            <path d="m52 52-8-8"></path>
+                        </svg>
+                    </div>
+                    <h3 class="empty-title">検索結果が見つかりませんでした</h3>
+                    <p class="empty-description">別のキーワードをお試しください</p>
                 </div>
-            </div>
 
-            <!-- Pagination -->
-            <div v-if="!loading && results.length > 0 && totalPages > 1" class="pagination">
-                <button 
-                    @click="changePage(currentPage - 1)"
-                    :disabled="currentPage === 1"
-                    class="pagination-btn"
-                >
-                    ← 前へ
-                </button>
-                
-                <div class="pagination-numbers">
+                <!-- Pagination -->
+                <div v-if="!loading && results.length > 0 && totalPages > 1" class="pagination content-area">
                     <button 
-                        v-for="page in visiblePages" 
-                        :key="page"
-                        @click="changePage(page)"
-                        :class="['pagination-number', { 'active': page === currentPage }]"
+                        @click="changePage(currentPage - 1)"
+                        :disabled="currentPage === 1"
+                        class="pagination-btn"
                     >
-                        {{ page }}
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    
+                    <div class="pagination-numbers">
+                        <button 
+                            v-for="page in visiblePages" 
+                            :key="page"
+                            @click="changePage(page)"
+                            :class="['pagination-number', { 'active': page === currentPage }]"
+                        >
+                            {{ page }}
+                        </button>
+                    </div>
+                    
+                    <button 
+                        @click="changePage(currentPage + 1)"
+                        :disabled="currentPage >= totalPages"
+                        class="pagination-btn"
+                    >
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                     </button>
                 </div>
-                
-                <button 
-                    @click="changePage(currentPage + 1)"
-                    :disabled="currentPage >= totalPages"
-                    class="pagination-btn"
-                >
-                    次へ →
-                </button>
             </div>
         </main>
 
-        <!-- Footer -->
-        <footer class="mobile-footer">
-            <div class="footer-content">
-                <p class="footer-powered">Powered by <a href="https://api.p2pear.asia/" target="_blank" class="text-primary">Wholphin Search API</a></p>
-                <div class="footer-links">
-                    <a href="#" class="footer-link">プライバシーポリシー</a>
-                    <span class="footer-separator">•</span>
-                    <a href="#" class="footer-link">利用規約</a>
-                    <span class="footer-separator">•</span>
-                    <a href="#" class="footer-link">お問い合わせ</a>
+        <!-- Bottom Tab Bar - iOS Style -->
+        <nav class="tab-bar">
+            <button 
+                v-for="type in searchTypes" 
+                :key="type.value"
+                @click="changeSearchType(type.value)"
+                :class="['tab-bar-item', { 'active': currentType === type.value }]"
+            >
+                <div class="tab-bar-icon" v-html="type.icon"></div>
+                <span class="tab-bar-label">{{ type.label }}</span>
+            </button>
+            <button 
+                @click="showSettings = !showSettings"
+                :class="['tab-bar-item', { 'active': showSettings }]"
+            >
+                <div class="tab-bar-icon">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+                    </svg>
                 </div>
-            </div>
-        </footer>
+                <span class="tab-bar-label">設定</span>
+            </button>
+        </nav>
     </div>
 
     <!-- API Client -->
@@ -329,24 +325,24 @@
                     suggestionDebounceTimer: null,
                     searchTypes: [
                         { 
-                            label: 'Web', 
+                            label: 'すべて', 
                             value: 'web',
-                            icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"/></svg>'
+                            icon: '<svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855-.173.324-.33.682-.469 1.068H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"/></svg>'
                         },
                         { 
                             label: '画像', 
                             value: 'image',
-                            icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>'
+                            icon: '<svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>'
                         },
                         { 
                             label: '動画', 
                             value: 'video',
-                            icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2z"/><path d="M10.8 8 6.5 5.015v5.97L10.8 8z"/></svg>'
+                            icon: '<svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2z"/><path d="M10.8 8 6.5 5.015v5.97L10.8 8z"/></svg>'
                         },
                         { 
                             label: 'ニュース', 
                             value: 'news',
-                            icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 2.5A1.5 1.5 0 0 1 1.5 1h11A1.5 1.5 0 0 1 14 2.5v10.528c0 .3-.05.654-.238.972h.738a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 1 1 0v9a1.5 1.5 0 0 1-1.5 1.5H1.497A1.497 1.497 0 0 1 0 13.5v-11zM12 14c.37 0 .654-.211.853-.441.092-.106.147-.279.147-.531V2.5a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0-.5.5v11c0 .278.223.5.497.5H12z"/><path d="M2 3h10v2H2V3zm0 3h4v3H2V6zm0 4h4v1H2v-1zm0 2h4v1H2v-1zm5-6h2v1H7V6zm3 0h2v1h-2V6zM7 8h2v1H7V8zm3 0h2v1h-2V8zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1z"/></svg>'
+                            icon: '<svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M0 2.5A1.5 1.5 0 0 1 1.5 1h11A1.5 1.5 0 0 1 14 2.5v10.528c0 .3-.05.654-.238.972h.738a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 1 1 0v9a1.5 1.5 0 0 1-1.5 1.5H1.497A1.497 1.497 0 0 1 0 13.5v-11zM12 14c.37 0 .654-.211.853-.441.092-.106.147-.279.147-.531V2.5a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0-.5.5v11c0 .278.223.5.497.5H12z"/><path d="M2 3h10v2H2V3zm0 3h4v3H2V6zm0 4h4v1H2v-1zm0 2h4v1H2v-1zm5-6h2v1H7V6zm3 0h2v1h-2V6zM7 8h2v1H7V8zm3 0h2v1h-2V8zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1z"/></svg>'
                         }
                     ],
                     api: null
@@ -373,10 +369,8 @@
                 }
             },
             mounted() {
-                // Initialize API client
                 this.api = new WholphinAPI();
                 
-                // Load query from URL if exists
                 const urlParams = new URLSearchParams(window.location.search);
                 const urlQuery = urlParams.get('q');
                 if (urlQuery) {
@@ -387,25 +381,21 @@
             methods: {
                 handleSearchFocus() {
                     this.isSearchFocused = true;
-                    // Only show suggestions if we have query and suggestions
                     if (this.query.trim() && this.suggestions.length > 0) {
                         this.showSuggestions = true;
                     }
                 },
                 async handleSearchInput() {
-                    // Clear previous debounce timer
                     if (this.suggestionDebounceTimer) {
                         clearTimeout(this.suggestionDebounceTimer);
                     }
                     
-                    // Don't fetch suggestions if query is empty
                     if (!this.query.trim()) {
                         this.suggestions = [];
                         this.showSuggestions = false;
                         return;
                     }
                     
-                    // Debounce suggestion requests
                     this.suggestionDebounceTimer = setTimeout(async () => {
                         try {
                             const response = await this.api.search({
@@ -426,7 +416,6 @@
                 },
                 handleSearchBlur() {
                     this.isSearchFocused = false;
-                    // Delay hiding suggestions to allow click events to fire
                     setTimeout(() => {
                         this.showSuggestions = false;
                     }, 200);
@@ -436,9 +425,7 @@
                         return;
                     }
                     
-                    // Hide suggestions
                     this.showSuggestions = false;
-
                     this.loading = true;
                     this.error = null;
                     this.searchPerformed = true;
@@ -455,12 +442,10 @@
 
                         const response = await this.api.search(options);
                         
-                        // Update URL with search query
                         const url = new URL(window.location);
                         url.searchParams.set('q', this.query);
                         window.history.pushState({}, '', url);
 
-                        // Process results
                         this.results = response.results || [];
                         if (response.pagination) {
                             this.totalPages = response.pagination.totalPages || 10;
@@ -480,8 +465,12 @@
                     }
                 },
                 changeSearchType(type) {
+                    if (this.currentType === type) return;
+                    
                     this.currentType = type;
                     this.currentPage = 1;
+                    this.showSettings = false;
+                    
                     if (this.query.trim() && this.searchPerformed) {
                         this.performSearch();
                     }
@@ -501,9 +490,7 @@
                     this.performSearch();
                 },
                 handleFaviconError(event) {
-                    // Hide broken favicon image
                     event.target.style.display = 'none';
-                    // Show fallback icon
                     const fallback = event.target.nextElementSibling;
                     if (fallback && fallback.classList.contains('result-favicon-fallback')) {
                         fallback.style.display = 'flex';
@@ -522,11 +509,11 @@
                         return views;
                     }
                     if (views >= 1000000) {
-                        return (views / 1000000).toFixed(1) + 'M回';
+                        return (views / 1000000).toFixed(1) + 'M';
                     } else if (views >= 1000) {
-                        return (views / 1000).toFixed(1) + 'K回';
+                        return (views / 1000).toFixed(1) + 'K';
                     }
-                    return views + '回';
+                    return views;
                 }
             }
         }).mount('#app');
