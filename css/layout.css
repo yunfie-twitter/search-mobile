@@ -39,6 +39,7 @@
   height: var(--header-height);
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 0 var(--space-20);
   transition: height var(--transition-base), padding var(--transition-base);
 }
@@ -51,42 +52,66 @@
 
 .mobile-header.header-compact {
   height: var(--header-compact-height);
-}
-
-/* Center search layout - Apple style */
-.search-centered-layout {
-  min-height: 60vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: var(--space-48) var(--space-20);
-  transition: all var(--transition-slow);
-}
-
-.search-centered-layout.search-active {
-  min-height: 0;
-  padding: var(--space-24) var(--space-20) var(--space-16);
   justify-content: flex-start;
 }
 
-/* Search box wrapper with smooth positioning */
+/* Logo container with center-to-left animation */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  transition: all var(--transition-slow);
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--color-primary);
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+}
+
+.header-compact .logo-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.logo-text {
+  font-size: var(--font-size-22);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: -0.03em;
+  transition: all var(--transition-base);
+}
+
+.header-compact .logo-text {
+  font-size: var(--font-size-17);
+}
+
+/* Main content area */
+.main-content {
+  min-height: calc(100vh - var(--header-height) - var(--tab-bar-height));
+  padding-top: var(--space-24);
+  padding-bottom: calc(var(--tab-bar-height) + var(--space-32));
+  background-color: var(--color-bg-secondary);
+}
+
+/* Content area spacing */
+.content-area {
+  margin-top: var(--space-24);
+}
+
+.content-area:first-child {
+  margin-top: 0;
+}
+
+/* Search box wrapper */
 .search-box-wrapper {
   width: 100%;
   max-width: 600px;
   margin: 0 auto var(--space-24);
-  transition: max-width var(--transition-base), margin var(--transition-base);
-}
-
-.search-centered-layout .search-box-wrapper {
-  margin-bottom: var(--space-32);
-}
-
-/* Main content area */
-main {
-  min-height: calc(100vh - var(--header-height) - var(--tab-bar-height));
-  padding-bottom: calc(var(--tab-bar-height) + var(--space-32));
-  background-color: var(--color-bg-secondary);
+  position: relative;
 }
 
 /* Tab bar - iOS style bottom navigation */
@@ -105,8 +130,8 @@ main {
   justify-content: space-around;
   align-items: center;
   z-index: var(--z-fixed);
-  padding: 0 var(--space-8) env(safe-area-inset-bottom);
-  padding-bottom: max(var(--space-8), env(safe-area-inset-bottom));
+  padding: 0 var(--space-8);
+  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -121,17 +146,20 @@ main {
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
-  min-width: var(--touch-target-min);
+  min-width: 60px;
   min-height: var(--touch-target-min);
   color: var(--color-text-secondary);
   font-size: var(--font-size-11);
   font-weight: var(--font-weight-medium);
+  letter-spacing: -0.01em;
   transition: color var(--transition-fast), transform var(--transition-fast);
   cursor: pointer;
   border: none;
   background: none;
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-8);
   position: relative;
+  flex: 1;
+  max-width: 100px;
 }
 
 .tab-bar-item:active {
@@ -148,6 +176,17 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.tab-bar-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tab-bar-label {
+  font-size: var(--font-size-11);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 /* Stack layouts with proper spacing */
@@ -182,14 +221,10 @@ main {
   gap: var(--space-16);
 }
 
-.stack-web > article:first-child {
-  margin-top: var(--space-8);
-}
-
 .stack-video {
   display: flex;
   flex-direction: column;
-  gap: var(--space-24);  /* More space for video thumbnails */
+  gap: var(--space-24);
 }
 
 .stack-news {
@@ -219,14 +254,6 @@ main {
   .grid-3 {
     grid-template-columns: repeat(4, 1fr);
   }
-}
-
-/* Footer */
-.mobile-footer {
-  background-color: var(--color-bg-primary);
-  border-top: 1px solid var(--color-border-primary);
-  padding: var(--space-32) var(--space-20);
-  margin-top: var(--space-64);
 }
 
 /* Safe area support for iOS notch */
@@ -328,4 +355,69 @@ body {
 .slide-down-leave-to {
   transform: translateY(20px);
   opacity: 0;
+}
+
+/* Settings Panel */
+.settings-panel {
+  margin-bottom: var(--space-24);
+}
+
+.settings-card {
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-20);
+  box-shadow: var(--shadow-1);
+}
+
+.settings-group {
+  margin-bottom: var(--space-16);
+}
+
+.settings-group:last-child {
+  margin-bottom: 0;
+}
+
+.settings-label {
+  display: block;
+  font-size: var(--font-size-15);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-8);
+  letter-spacing: -0.01em;
+}
+
+.settings-select {
+  width: 100%;
+  padding: var(--space-12) var(--space-16);
+  font-size: var(--font-size-17);
+  background-color: var(--color-gray-6);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238E8E93' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-16) center;
+  padding-right: var(--space-40);
+}
+
+.settings-select:hover {
+  background-color: var(--color-gray-5);
+}
+
+.settings-select:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px var(--color-border-focus);
+}
+
+@media (prefers-color-scheme: dark) {
+  .settings-select {
+    background-color: var(--color-bg-tertiary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2398989D' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+  }
 }

@@ -70,76 +70,6 @@
   border-radius: var(--radius-full);
 }
 
-/* Logo - Center to corner animation */
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: var(--space-12);
-  transition: all var(--transition-slow);
-}
-
-.logo-icon {
-  width: 40px;
-  height: 40px;
-  color: var(--color-primary);
-  transition: all var(--transition-base);
-  flex-shrink: 0;
-}
-
-.header-compact .logo-icon {
-  width: 28px;
-  height: 28px;
-}
-
-.logo-text {
-  font-size: var(--font-size-22);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0;
-  letter-spacing: -0.03em;
-  transition: all var(--transition-base);
-}
-
-.header-compact .logo-text {
-  font-size: var(--font-size-17);
-}
-
-/* Card Component - iOS elevation */
-.card {
-  background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-primary);
-  border-radius: var(--radius-xl);
-  padding: var(--space-20);
-  box-shadow: var(--shadow-1);
-  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
-}
-
-.card:active {
-  transform: scale(0.99);
-}
-
-@media (hover: hover) {
-  .card:hover {
-    box-shadow: var(--shadow-2);
-  }
-}
-
-.card-header {
-  font-size: var(--font-size-20);
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--space-16);
-  padding-bottom: var(--space-16);
-  border-bottom: 1px solid var(--color-border-primary);
-  line-height: var(--line-height-tight);
-  letter-spacing: -0.02em;
-}
-
-.card-body {
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-relaxed);
-  font-size: var(--font-size-15);
-}
-
 /* Search Box - iOS style with proper depth */
 .search-box {
   position: relative;
@@ -216,6 +146,8 @@
   overflow: hidden;
   z-index: var(--z-dropdown);
   animation: scaleIn var(--transition-base) var(--ease-out-apple);
+  max-height: 320px;
+  overflow-y: auto;
 }
 
 @keyframes scaleIn {
@@ -260,6 +192,26 @@
 .suggestion-icon {
   color: var(--color-text-tertiary);
   flex-shrink: 0;
+}
+
+/* Card Component - iOS elevation */
+.card {
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-20);
+  box-shadow: var(--shadow-1);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.card:active {
+  transform: scale(0.99);
+}
+
+@media (hover: hover) {
+  .card:hover {
+    box-shadow: var(--shadow-2);
+  }
 }
 
 /* Result Cards - Visual weight hierarchy */
@@ -441,7 +393,6 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-full);
-  font-size: var(--font-size-20);
 }
 
 .video-meta {
@@ -505,19 +456,32 @@
   align-items: flex-start;
   padding: var(--space-16);
   border-radius: var(--radius-lg);
-  margin-bottom: var(--space-16);
   line-height: var(--line-height-relaxed);
   font-size: var(--font-size-15);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-primary);
+  box-shadow: var(--shadow-1);
 }
 
 .alert-icon {
-  font-size: var(--font-size-22);
   flex-shrink: 0;
+  color: var(--color-warning);
+}
+
+.alert-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.alert-message {
+  font-size: var(--font-size-13);
+  margin-top: var(--space-4);
+  color: var(--color-text-secondary);
 }
 
 .alert-warning {
   background-color: var(--color-warning-bg);
-  color: var(--color-warning);
+  border-color: var(--color-warning);
 }
 
 /* Empty State */
@@ -533,9 +497,13 @@
 }
 
 .empty-icon {
-  font-size: 64px;
-  margin-bottom: var(--space-24);
-  opacity: 0.3;
+  color: var(--color-text-quaternary);
+  margin: 0 auto var(--space-24);
+}
+
+.empty-icon svg {
+  width: 64px;
+  height: 64px;
 }
 
 .empty-title {
@@ -549,35 +517,8 @@
 .empty-description {
   font-size: var(--font-size-17);
   color: var(--color-text-secondary);
-  margin: 0 0 var(--space-32) 0;
+  margin: 0;
   line-height: var(--line-height-relaxed);
-}
-
-.empty-suggestions {
-  display: inline-block;
-  text-align: left;
-  padding: var(--space-20);
-  background-color: var(--color-bg-tertiary);
-  border-radius: var(--radius-lg);
-}
-
-.empty-tips {
-  list-style: none;
-  padding: 0;
-  margin: var(--space-12) 0 0 0;
-}
-
-.empty-tips li {
-  padding: var(--space-8) 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-15);
-  line-height: var(--line-height-normal);
-}
-
-.empty-tips li::before {
-  content: '• ';
-  margin-right: var(--space-8);
-  color: var(--color-primary);
 }
 
 /* Pagination - iOS style */
@@ -586,12 +527,11 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-12);
-  margin-top: var(--space-32);
-  padding: var(--space-20) 0;
+  padding: var(--space-24) 0;
 }
 
 .pagination-btn {
-  padding: var(--space-8) var(--space-16);
+  padding: var(--space-12);
   font-size: var(--font-size-17);
   font-weight: var(--font-weight-medium);
   border: none;
@@ -600,7 +540,11 @@
   color: var(--color-primary);
   cursor: pointer;
   transition: all var(--transition-fast);
+  min-width: var(--touch-target-min);
   min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pagination-btn:hover:not(:disabled) {
@@ -705,48 +649,6 @@
 .skeleton-url {
   height: 16px;
   width: 40%;
-}
-
-/* Footer */
-.footer-content {
-  text-align: center;
-}
-
-.footer-powered {
-  font-size: var(--font-size-13);
-  color: var(--color-text-tertiary);
-  margin-bottom: var(--space-12);
-}
-
-.footer-links {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-12);
-  flex-wrap: wrap;
-}
-
-.footer-link {
-  font-size: var(--font-size-13);
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-  padding: var(--space-8);
-  min-height: var(--touch-target-min);
-  display: flex;
-  align-items: center;
-}
-
-.footer-link:hover {
-  color: var(--color-primary);
-}
-
-.footer-link:active {
-  opacity: 0.6;
-}
-
-.footer-separator {
-  color: var(--color-text-quaternary);
 }
 
 /* Long-press feedback - iOS style */
