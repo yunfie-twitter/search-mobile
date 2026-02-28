@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="css/start-page.css">
     <link rel="stylesheet" href="css/settings-page.css">
     <link rel="stylesheet" href="css/mobile-search.css">
+    <link rel="stylesheet" href="css/components.css">
     
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
@@ -139,6 +140,7 @@
                     :key="type.value"
                     @click="changeSearchType(type.value)"
                     :class="['sidebar-nav-item', { 'active': currentType === type.value && currentView === 'search' }]"
+                    :aria-current="currentType === type.value && currentView === 'search' ? 'page' : undefined"
                 >
                     <div class="sidebar-nav-icon" v-html="type.icon"></div>
                     <span class="sidebar-nav-label">{{ type.label }}</span>
@@ -151,6 +153,7 @@
                 <button 
                     @click="toggleSettings"
                     :class="['sidebar-nav-item', { 'active': currentView === 'settings' }]"
+                    :aria-current="currentView === 'settings' ? 'page' : undefined"
                 >
                     <div class="sidebar-nav-icon">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -376,7 +379,7 @@
                                     <div class="settings-item">
                                         <div class="settings-item-info">
                                             <label class="settings-item-label">バージョン</label>
-                                            <p class="settings-item-description">Wholphin Search 2.1 - Unified Design System</p>
+                                            <p class="settings-item-description">Wholphin Search 2.2 - Modern Tab Bar with FAB</p>
                                         </div>
                                     </div>
                                 </div>
@@ -645,35 +648,37 @@
             </transition>
         </div>
 
-        <!-- Mobile Tab Bar -->
+        <!-- Mobile Tab Bar - 3つのタイプ + 中央に丸いFAB -->
         <nav class="tab-bar" v-show="currentView !== 'settings' && !showMobileSearch">
             <button 
-                v-for="type in searchTypes" 
+                v-for="(type, index) in searchTypes" 
                 :key="type.value" 
                 @click="changeSearchType(type.value)" 
                 :class="['tab-bar-item', { 'active': currentType === type.value && currentView === 'search' }]"
                 :aria-label="type.label"
+                :aria-current="currentType === type.value && currentView === 'search' ? 'page' : undefined"
+                v-show="index < 3"
             >
                 <div class="tab-bar-icon" v-html="type.icon"></div>
                 <span class="tab-bar-label">{{ type.label }}</span>
+                <span v-if="error && currentType === type.value" class="tab-bar-badge">!</span>
             </button>
+            
+            <!-- 中央の丸いFAB検索ボタン -->
             <button 
-                @click="toggleSettings" 
-                :class="['tab-bar-item', { 'active': currentView === 'settings' }]"
-                aria-label="設定"
+                class="tab-bar-fab" 
+                @click="goToHome"
+                aria-label="検索ホームに戻る"
             >
-                <div class="tab-bar-icon">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
-                    </svg>
-                </div>
-                <span class="tab-bar-label">設定</span>
+                <svg class="tab-bar-fab-icon" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
             </button>
         </nav>
 
         <!-- Context Menu -->
-        <div v-if="showContextMenu" class="context-menu" :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }">
+        <div v-if="showContextMenu" class="context-menu" :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }" @click.stop>
             <button class="context-menu-item" @click="openInNewTab">
                 <svg class="context-menu-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
@@ -734,10 +739,10 @@
                     mobileSearchDebounceTimer: null,
                     isMobile: false,
                     searchTypes: [
-                        { label: 'すべて', value: 'web', icon: '<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"/></svg>' },
-                        { label: '画像', value: 'image', icon: '<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>' },
-                        { label: '動画', value: 'video', icon: '<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2z"/><path d="M10.8 8 6.5 5.015v5.97L10.8 8z"/></svg>' },
-                        { label: 'ニュース', value: 'news', icon: '<svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M0 2.5A1.5 1.5 0 0 1 1.5 1h11A1.5 1.5 0 0 1 14 2.5v10.528c0 .3-.05.654-.238.972h.738a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 1 1 0v9a1.5 1.5 0 0 1-1.5 1.5H1.497A1.497 1.497 0 0 1 0 13.5v-11zM12 14c.37 0 .654-.211.853-.441.092-.106.147-.279.147-.531V2.5a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0-.5.5v11c0 .278.223.5.497.5H12z"/><path d="M2 3h10v2H2V3zm0 3h4v3H2V6zm0 4h4v1H2v-1zm0 2h4v1H2v-1zm5-6h2v1H7V6zm3 0h2v1h-2V6zM7 8h2v1H7V8zm3 0h2v1h-2V8zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1z"/></svg>' }
+                        { label: 'ウェブ', value: 'web', icon: '<svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"/></svg>' },
+                        { label: '画像', value: 'image', icon: '<svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>' },
+                        { label: '動画', value: 'video', icon: '<svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2z"/><path d="M10.8 8 6.5 5.015v5.97L10.8 8z"/></svg>' },
+                        { label: 'ニュース', value: 'news', icon: '<svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M0 2.5A1.5 1.5 0 0 1 1.5 1h11A1.5 1.5 0 0 1 14 2.5v10.528c0 .3-.05.654-.238.972h.738a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 1 1 0v9a1.5 1.5 0 0 1-1.5 1.5H1.497A1.497 1.497 0 0 1 0 13.5v-11zM12 14c.37 0 .654-.211.853-.441.092-.106.147-.279.147-.531V2.5a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0-.5.5v11c0 .278.223.5.497.5H12z"/><path d="M2 3h10v2H2V3zm0 3h4v3H2V6zm0 4h4v1H2v-1zm0 2h4v1H2v-1zm5-6h2v1H7V6zm3 0h2v1h-2V6zM7 8h2v1H7V8zm3 0h2v1h-2V8zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1z"/></svg>' }
                     ],
                     viewModes: [
                         { label: 'リスト', value: 'list', icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>' },
@@ -821,6 +826,16 @@
                         if (this.animationController) {
                             this.animationController.setEnabled(false);
                         }
+                    }
+                },
+                goToHome() {
+                    this.currentView = 'start';
+                    this.query = '';
+                    this.results = [];
+                    this.error = null;
+                    this.searchPerformed = false;
+                    if (this.isMobile) {
+                        this.openMobileSearch();
                     }
                 },
                 openMobileSearch() {
@@ -937,7 +952,7 @@
                     if (!this.query.trim()) return;
                     this.showSuggestions = false; this.showHistory = false;
                     this.loading = true; this.error = null; this.searchPerformed = true; this.results = [];
-                    this.keyboardNav.reset(); this.historyManager.add(this.query);
+                    this.keyboardNav.reset(); this.historyManager.add(this.query, this.currentType);
                     this.searchHistory = this.historyManager.getRecent();
                     try {
                         const response = await this.api.search({ q: this.query, type: this.currentType, page: this.currentPage, safesearch: this.safesearch, lang: this.language });
@@ -953,10 +968,20 @@
                     } catch (err) { this.error = err instanceof WholphinAPIError ? err.message : 'ネットワークエラー'; } finally { this.loading = false; }
                 },
                 changeSearchType(type) {
-                    if (this.currentType === type) return;
-                    this.currentType = type; this.currentPage = 1;
+                    if (this.currentType === type && this.currentView === 'search') {
+                        // 同じタイプを再タップ = 最新結果を再取得
+                        if (this.query.trim()) {
+                            this.currentPage = 1;
+                            this.performSearch();
+                        }
+                        return;
+                    }
+                    this.currentType = type; 
+                    this.currentPage = 1;
                     this.currentView = 'search';
-                    if (this.query.trim() && this.searchPerformed) this.performSearch();
+                    if (this.query.trim()) {
+                        this.performSearch();
+                    }
                 },
                 changePage(page) { 
                     if (page < 1 || page > this.totalPages) return; 
