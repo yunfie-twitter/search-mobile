@@ -27,10 +27,19 @@
 <body>
     <div id="app">
         <!-- Header -->
-        <header class="mobile-header">
+        <header class="mobile-header" :class="{ 'header-compact': searchPerformed }">
             <div class="flex items-center justify-between">
-                <h1 class="text-3xl font-extrabold text-primary" style="margin-bottom: 0;">Wholphin Search</h1>
-                <button class="btn-icon btn-ghost" @click="showSettings = !showSettings" aria-label="設定">
+                <div class="flex items-center gap-3">
+                    <!-- Logo Icon -->
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.1"/>
+                            <path d="M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h1 class="logo-text">Wholphin Search</h1>
+                </div>
+                <button class="btn-icon btn-primary-subtle" @click="showSettings = !showSettings" aria-label="設定">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
@@ -43,21 +52,21 @@
         <main class="container py-4">
             <!-- Search Box with Autocomplete -->
             <div class="search-box-wrapper mb-6">
-                <div class="search-box">
+                <div class="search-box" :class="{ 'search-box-focused': isSearchFocused }">
                     <input 
                         type="search" 
                         class="search-input" 
                         v-model="query"
                         @input="handleSearchInput"
                         @keyup.enter="performSearch"
-                        @focus="showSuggestions = true"
+                        @focus="handleSearchFocus"
                         @blur="handleSearchBlur"
-                        placeholder="検索ワードを入力..."
+                        placeholder="何をお探しですか？🐬"
                         aria-label="検索"
                         autocomplete="off"
                     >
                     <button class="search-button" @click="performSearch" aria-label="検索実行">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <path d="m21 21-4.35-4.35"></path>
                         </svg>
@@ -83,22 +92,27 @@
                 </transition>
             </div>
 
-            <!-- Search Type Tabs (without Suggest and Panel) -->
-            <div class="flex gap-2 mb-6 scroll-x pb-2">
-                <button 
-                    v-for="type in searchTypes" 
-                    :key="type.value"
-                    @click="changeSearchType(type.value)"
-                    :class="['btn', 'btn-sm', currentType === type.value ? 'btn-primary' : 'btn-ghost']"
-                >
-                    {{ type.label }}
-                </button>
+            <!-- Search Type Tabs with Icons -->
+            <div class="tabs-wrapper mb-6">
+                <div class="tabs-container">
+                    <button 
+                        v-for="type in searchTypes" 
+                        :key="type.value"
+                        @click="changeSearchType(type.value)"
+                        :class="['tab-item', { 'tab-active': currentType === type.value }]"
+                    >
+                        <span v-html="type.icon" class="tab-icon"></span>
+                        <span class="tab-label">{{ type.label }}</span>
+                    </button>
+                </div>
+                <div class="tabs-fade-left"></div>
+                <div class="tabs-fade-right"></div>
             </div>
 
             <!-- Settings Panel -->
             <transition name="slide-down">
                 <div v-if="showSettings" class="card mb-6 settings-panel">
-                    <div class="card-header">検索設定</div>
+                    <div class="card-header">🔧 検索設定</div>
                     <div class="card-body stack-sm">
                         <div>
                             <label class="block text-sm font-medium mb-2">セーフサーチ</label>
@@ -119,25 +133,36 @@
                 </div>
             </transition>
 
-            <!-- Loading State with Skeleton -->
+            <!-- Loading State with Detailed Skeleton -->
             <div v-if="loading">
                 <div class="stack">
-                    <div class="skeleton skeleton-card" v-for="i in 3" :key="i"></div>
+                    <div class="skeleton-result" v-for="i in 3" :key="i">
+                        <div class="skeleton-header">
+                            <div class="skeleton skeleton-favicon"></div>
+                            <div class="skeleton skeleton-title"></div>
+                        </div>
+                        <div class="skeleton skeleton-description"></div>
+                        <div class="skeleton skeleton-url"></div>
+                    </div>
                 </div>
             </div>
 
             <!-- Error State -->
-            <div v-if="error" class="alert alert-error mb-6">
-                <strong>エラーが発生しました:</strong> {{ error }}
+            <div v-if="error" class="alert alert-warning mb-6">
+                <div class="alert-icon">⚠️</div>
+                <div>
+                    <strong>問題が発生しました</strong>
+                    <p class="text-sm mt-1">{{ error }}</p>
+                </div>
             </div>
 
             <!-- Results -->
             <transition name="fade" mode="out-in">
-                <div v-if="!loading && results.length > 0" :key="currentType" class="stack" :class="getResultStackClass()">
+                <div v-if="!loading && results.length > 0" :key="currentType" class="results-container">
                     <!-- Web Results with Favicon -->
                     <div v-if="currentType === 'web'" class="stack-web">
-                        <article v-for="(item, index) in results" :key="index" class="card">
-                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="block">
+                        <article v-for="(item, index) in results" :key="index" class="result-card">
+                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
                                 <div class="result-header">
                                     <img 
                                         v-if="item.favicon" 
@@ -152,43 +177,44 @@
                                             <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 0-1h5.793L8.146 4.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 7.5H4.5z"/>
                                         </svg>
                                     </div>
-                                    <h3 class="text-lg font-semibold text-primary result-title">{{ item.title }}</h3>
+                                    <h3 class="result-title">{{ item.title }}</h3>
                                 </div>
-                                <p class="text-sm text-secondary mb-2 text-description">{{ item.summary || item.description }}</p>
-                                <p class="text-xs text-tertiary truncate result-url">{{ item.url }}</p>
+                                <p class="result-description">{{ item.summary || item.description }}</p>
+                                <p class="result-domain">{{ extractDomain(item.url) }}</p>
                             </a>
                         </article>
                     </div>
 
                     <!-- Image Results -->
-                    <div v-if="currentType === 'image'" class="grid grid-cols-2 md:grid-cols-3">
+                    <div v-if="currentType === 'image'" class="image-grid">
                         <a 
                             v-for="(item, index) in results" 
                             :key="index" 
                             :href="item.url" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            class="card p-0 overflow-hidden"
+                            class="image-item"
                         >
-                            <img :src="item.thumbnail" :alt="item.title" class="w-full h-48 object-cover" loading="lazy">
-                            <div class="p-2">
-                                <p class="text-sm truncate">{{ item.title }}</p>
+                            <div class="image-wrapper">
+                                <img :src="item.thumbnail" :alt="item.title" class="image-thumb" loading="lazy">
                             </div>
+                            <p class="image-title">{{ item.title }}</p>
                         </a>
                     </div>
 
                     <!-- Video Results -->
                     <div v-if="currentType === 'video'" class="stack-video">
-                        <article v-for="(item, index) in results" :key="index" class="card">
-                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="block">
-                                <div v-if="item.thumbnail" class="mb-3">
-                                    <img :src="item.thumbnail" :alt="item.title" class="w-full rounded-lg" loading="lazy">
+                        <article v-for="(item, index) in results" :key="index" class="result-card">
+                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
+                                <div v-if="item.thumbnail" class="video-thumbnail">
+                                    <img :src="item.thumbnail" :alt="item.title" loading="lazy">
+                                    <div class="video-overlay">▶</div>
                                 </div>
-                                <h3 class="text-lg font-semibold mb-2 text-primary">{{ item.title }}</h3>
-                                <p class="text-sm text-secondary mb-2 text-description">{{ item.summary || item.description }}</p>
-                                <div class="flex items-center gap-2 text-xs text-tertiary">
-                                    <span v-if="item.duration">{{ item.duration }}</span>
-                                    <span v-if="item.views">{{ item.views }} 回視聴</span>
+                                <h3 class="result-title-video">{{ item.title }}</h3>
+                                <p class="result-description">{{ item.summary || item.description }}</p>
+                                <div class="video-meta">
+                                    <span v-if="item.duration" class="meta-badge">⏱ {{ item.duration }}</span>
+                                    <span v-if="item.views" class="meta-badge">👁 {{ formatViews(item.views) }}</span>
                                 </div>
                             </a>
                         </article>
@@ -196,18 +222,18 @@
 
                     <!-- News Results -->
                     <div v-if="currentType === 'news'" class="stack-news">
-                        <article v-for="(item, index) in results" :key="index" class="card">
-                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="block">
-                                <div class="flex gap-3">
-                                    <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.title" class="w-24 h-24 rounded object-cover" loading="lazy">
-                                    <div class="flex-1">
-                                        <h3 class="text-base font-semibold mb-1 text-primary">{{ item.title }}</h3>
-                                        <p class="text-sm text-secondary mb-2 line-clamp-2 text-description">{{ item.summary || item.description }}</p>
-                                        <div class="flex items-center gap-2 text-xs text-tertiary">
-                                            <span v-if="item.source">{{ item.source }}</span>
-                                            <span v-if="item.date">{{ item.date }}</span>
+                        <article v-for="(item, index) in results" :key="index" class="result-card">
+                            <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
+                                <div class="news-content">
+                                    <div class="news-text">
+                                        <h3 class="result-title-news">{{ item.title }}</h3>
+                                        <p class="result-description">{{ item.summary || item.description }}</p>
+                                        <div class="news-meta">
+                                            <span v-if="item.source" class="meta-source">📰 {{ item.source }}</span>
+                                            <span v-if="item.date" class="meta-date">{{ item.date }}</span>
                                         </div>
                                     </div>
+                                    <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.title" class="news-thumbnail" loading="lazy">
                                 </div>
                             </a>
                         </article>
@@ -216,34 +242,62 @@
             </transition>
 
             <!-- Empty State -->
-            <div v-if="!loading && !error && searchPerformed && results.length === 0" class="text-center py-12">
-                <p class="text-secondary">検索結果が見つかりませんでした</p>
+            <div v-if="!loading && !error && searchPerformed && results.length === 0" class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <h3 class="empty-title">検索結果が見つかりませんでした</h3>
+                <p class="empty-description">別のキーワードをお試しください</p>
+                <div class="empty-suggestions">
+                    <p class="text-sm text-secondary mb-2">検索のコツ:</p>
+                    <ul class="empty-tips">
+                        <li>キーワードを変更してみる</li>
+                        <li>一般的な言葉を使う</li>
+                        <li>スペルを確認する</li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Pagination -->
-            <div v-if="!loading && results.length > 0 && totalPages > 1" class="flex justify-center gap-2 mt-8 safe-all">
+            <div v-if="!loading && results.length > 0 && totalPages > 1" class="pagination">
                 <button 
                     @click="changePage(currentPage - 1)"
                     :disabled="currentPage === 1"
-                    class="btn btn-outline btn-sm"
+                    class="pagination-btn"
                 >
-                    前へ
+                    ← 前へ
                 </button>
-                <span class="btn btn-ghost btn-sm">{{ currentPage }} / {{ totalPages }}</span>
+                
+                <div class="pagination-numbers">
+                    <button 
+                        v-for="page in visiblePages" 
+                        :key="page"
+                        @click="changePage(page)"
+                        :class="['pagination-number', { 'active': page === currentPage }]"
+                    >
+                        {{ page }}
+                    </button>
+                </div>
+                
                 <button 
                     @click="changePage(currentPage + 1)"
                     :disabled="currentPage >= totalPages"
-                    class="btn btn-outline btn-sm"
+                    class="pagination-btn"
                 >
-                    次へ
+                    次へ →
                 </button>
             </div>
         </main>
 
         <!-- Footer -->
         <footer class="mobile-footer">
-            <div class="text-center text-xs text-tertiary">
-                <p>Powered by <a href="https://api.p2pear.asia/" target="_blank" class="text-primary">Wholphin Search API</a></p>
+            <div class="footer-content">
+                <p class="footer-powered">Powered by <a href="https://api.p2pear.asia/" target="_blank" class="text-primary">Wholphin Search API</a></p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">プライバシーポリシー</a>
+                    <span class="footer-separator">•</span>
+                    <a href="#" class="footer-link">利用規約</a>
+                    <span class="footer-separator">•</span>
+                    <a href="#" class="footer-link">お問い合わせ</a>
+                </div>
             </div>
         </footer>
     </div>
@@ -267,18 +321,55 @@
                     results: [],
                     suggestions: [],
                     showSuggestions: false,
+                    isSearchFocused: false,
                     loading: false,
                     error: null,
                     searchPerformed: false,
                     showSettings: false,
                     suggestionDebounceTimer: null,
                     searchTypes: [
-                        { label: 'Web', value: 'web' },
-                        { label: '画像', value: 'image' },
-                        { label: '動画', value: 'video' },
-                        { label: 'ニュース', value: 'news' }
+                        { 
+                            label: 'Web', 
+                            value: 'web',
+                            icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"/></svg>'
+                        },
+                        { 
+                            label: '画像', 
+                            value: 'image',
+                            icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>'
+                        },
+                        { 
+                            label: '動画', 
+                            value: 'video',
+                            icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2z"/><path d="M10.8 8 6.5 5.015v5.97L10.8 8z"/></svg>'
+                        },
+                        { 
+                            label: 'ニュース', 
+                            value: 'news',
+                            icon: '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 2.5A1.5 1.5 0 0 1 1.5 1h11A1.5 1.5 0 0 1 14 2.5v10.528c0 .3-.05.654-.238.972h.738a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 1 1 0v9a1.5 1.5 0 0 1-1.5 1.5H1.497A1.497 1.497 0 0 1 0 13.5v-11zM12 14c.37 0 .654-.211.853-.441.092-.106.147-.279.147-.531V2.5a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0-.5.5v11c0 .278.223.5.497.5H12z"/><path d="M2 3h10v2H2V3zm0 3h4v3H2V6zm0 4h4v1H2v-1zm0 2h4v1H2v-1zm5-6h2v1H7V6zm3 0h2v1h-2V6zM7 8h2v1H7V8zm3 0h2v1h-2V8zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1zm-3 2h2v1H7v-1zm3 0h2v1h-2v-1z"/></svg>'
+                        }
                     ],
                     api: null
+                }
+            },
+            computed: {
+                visiblePages() {
+                    const pages = [];
+                    const maxVisible = 5;
+                    const half = Math.floor(maxVisible / 2);
+                    
+                    let start = Math.max(1, this.currentPage - half);
+                    let end = Math.min(this.totalPages, start + maxVisible - 1);
+                    
+                    if (end - start < maxVisible - 1) {
+                        start = Math.max(1, end - maxVisible + 1);
+                    }
+                    
+                    for (let i = start; i <= end; i++) {
+                        pages.push(i);
+                    }
+                    
+                    return pages;
                 }
             },
             mounted() {
@@ -294,6 +385,13 @@
                 }
             },
             methods: {
+                handleSearchFocus() {
+                    this.isSearchFocused = true;
+                    // Only show suggestions if we have query and suggestions
+                    if (this.query.trim() && this.suggestions.length > 0) {
+                        this.showSuggestions = true;
+                    }
+                },
                 async handleSearchInput() {
                     // Clear previous debounce timer
                     if (this.suggestionDebounceTimer) {
@@ -317,7 +415,9 @@
                             });
                             
                             this.suggestions = response.suggestions || [];
-                            this.showSuggestions = this.suggestions.length > 0;
+                            if (this.isSearchFocused && this.suggestions.length > 0) {
+                                this.showSuggestions = true;
+                            }
                         } catch (err) {
                             console.error('Suggestion error:', err);
                             this.suggestions = [];
@@ -325,6 +425,7 @@
                     }, 300);
                 },
                 handleSearchBlur() {
+                    this.isSearchFocused = false;
                     // Delay hiding suggestions to allow click events to fire
                     setTimeout(() => {
                         this.showSuggestions = false;
@@ -371,7 +472,7 @@
                                 this.error += ': ' + err.details.errors.join(', ');
                             }
                         } else {
-                            this.error = 'ネットワークエラーが発生しました';
+                            this.error = 'ネットワークエラーが発生しました。インターネット接続を確認してください。';
                         }
                         console.error('Search error:', err);
                     } finally {
@@ -408,138 +509,27 @@
                         fallback.style.display = 'flex';
                     }
                 },
-                getResultStackClass() {
-                    const classMap = {
-                        'web': 'stack-web',
-                        'image': '',
-                        'video': 'stack-video',
-                        'news': 'stack-news'
-                    };
-                    return classMap[this.currentType] || 'stack';
+                extractDomain(url) {
+                    try {
+                        const urlObj = new URL(url);
+                        return urlObj.hostname.replace('www.', '');
+                    } catch {
+                        return url;
+                    }
+                },
+                formatViews(views) {
+                    if (typeof views === 'string') {
+                        return views;
+                    }
+                    if (views >= 1000000) {
+                        return (views / 1000000).toFixed(1) + 'M回';
+                    } else if (views >= 1000) {
+                        return (views / 1000).toFixed(1) + 'K回';
+                    }
+                    return views + '回';
                 }
             }
         }).mount('#app');
     </script>
-    
-    <style>
-        /* Vue transitions */
-        .fade-enter-active, .fade-leave-active {
-            transition: opacity 0.3s ease;
-        }
-        .fade-enter-from, .fade-leave-to {
-            opacity: 0;
-        }
-        
-        .slide-down-enter-active, .slide-down-leave-active {
-            transition: all 0.3s ease;
-        }
-        .slide-down-enter-from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        .slide-down-leave-to {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        
-        /* Search box wrapper for positioning */
-        .search-box-wrapper {
-            position: relative;
-        }
-        
-        /* Suggestions dropdown */
-        .suggestions-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            margin-top: 0.5rem;
-            background-color: var(--color-bg-primary);
-            border: 1px solid var(--color-border-primary);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-lg);
-            z-index: var(--z-index-dropdown);
-            overflow: hidden;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .suggestion-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            width: 100%;
-            padding: var(--space-3) var(--space-4);
-            text-align: left;
-            background: none;
-            border: none;
-            border-bottom: 1px solid var(--color-border-primary);
-            color: var(--color-text-primary);
-            cursor: pointer;
-            transition: background-color var(--transition-fast);
-            font-size: var(--font-size-base);
-        }
-        
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-        
-        .suggestion-item:hover {
-            background-color: var(--color-bg-secondary);
-        }
-        
-        .suggestion-item:active {
-            background-color: var(--color-bg-tertiary);
-        }
-        
-        .suggestion-icon {
-            flex-shrink: 0;
-            color: var(--color-text-tertiary);
-        }
-        
-        /* Result header with favicon */
-        .result-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .result-favicon {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-            border-radius: 3px;
-            object-fit: contain;
-        }
-        
-        .result-favicon-fallback {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--color-bg-tertiary);
-            border-radius: 3px;
-            color: var(--color-text-tertiary);
-        }
-        
-        .result-title {
-            margin-bottom: 0;
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-        
-        .result-url {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-    </style>
 </body>
 </html>
