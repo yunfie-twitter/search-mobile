@@ -41,25 +41,49 @@
 
         <!-- Main Content -->
         <main class="container py-4">
-            <!-- Search Box -->
-            <div class="search-box mb-6">
-                <input 
-                    type="search" 
-                    class="search-input" 
-                    v-model="query"
-                    @keyup.enter="performSearch"
-                    placeholder="検索ワードを入力..."
-                    aria-label="検索"
-                >
-                <button class="search-button" @click="performSearch" aria-label="検索実行">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                </button>
+            <!-- Search Box with Autocomplete -->
+            <div class="search-box-wrapper mb-6">
+                <div class="search-box">
+                    <input 
+                        type="search" 
+                        class="search-input" 
+                        v-model="query"
+                        @input="handleSearchInput"
+                        @keyup.enter="performSearch"
+                        @focus="showSuggestions = true"
+                        @blur="handleSearchBlur"
+                        placeholder="検索ワードを入力..."
+                        aria-label="検索"
+                        autocomplete="off"
+                    >
+                    <button class="search-button" @click="performSearch" aria-label="検索実行">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Suggestions Dropdown -->
+                <transition name="slide-down">
+                    <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-dropdown">
+                        <button 
+                            v-for="(suggestion, index) in suggestions" 
+                            :key="index"
+                            @mousedown.prevent="selectSuggestion(suggestion)"
+                            class="suggestion-item"
+                        >
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="suggestion-icon">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                            <span>{{ suggestion }}</span>
+                        </button>
+                    </div>
+                </transition>
             </div>
 
-            <!-- Search Type Tabs -->
+            <!-- Search Type Tabs (without Suggest and Panel) -->
             <div class="flex gap-2 mb-6 scroll-x pb-2">
                 <button 
                     v-for="type in searchTypes" 
@@ -188,33 +212,6 @@
                             </a>
                         </article>
                     </div>
-
-                    <!-- Suggestions -->
-                    <div v-if="currentType === 'suggest'" class="stack-sm">
-                        <button 
-                            v-for="(item, index) in results" 
-                            :key="index" 
-                            @click="selectSuggestion(item)"
-                            class="card text-left transition"
-                        >
-                            {{ item }}
-                        </button>
-                    </div>
-
-                    <!-- Panel Info -->
-                    <div v-if="currentType === 'panel' && panelData" class="card">
-                        <div class="card-header">{{ panelData.title }}</div>
-                        <div class="card-body">
-                            <img v-if="panelData.image" :src="panelData.image" :alt="panelData.title" class="w-full rounded-lg mb-4" loading="lazy">
-                            <p class="text-secondary text-description">{{ panelData.description }}</p>
-                            <div v-if="panelData.facts" class="mt-4 stack-sm">
-                                <div v-for="(fact, index) in panelData.facts" :key="index" class="flex justify-between border-b pb-2">
-                                    <span class="font-medium">{{ fact.label }}</span>
-                                    <span class="text-secondary">{{ fact.value }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </transition>
 
@@ -268,18 +265,18 @@
                     safesearch: 0,
                     language: 'ja',
                     results: [],
-                    panelData: null,
+                    suggestions: [],
+                    showSuggestions: false,
                     loading: false,
                     error: null,
                     searchPerformed: false,
                     showSettings: false,
+                    suggestionDebounceTimer: null,
                     searchTypes: [
                         { label: 'Web', value: 'web' },
                         { label: '画像', value: 'image' },
                         { label: '動画', value: 'video' },
-                        { label: 'ニュース', value: 'news' },
-                        { label: 'サジェスト', value: 'suggest' },
-                        { label: 'パネル', value: 'panel' }
+                        { label: 'ニュース', value: 'news' }
                     ],
                     api: null
                 }
@@ -297,16 +294,54 @@
                 }
             },
             methods: {
+                async handleSearchInput() {
+                    // Clear previous debounce timer
+                    if (this.suggestionDebounceTimer) {
+                        clearTimeout(this.suggestionDebounceTimer);
+                    }
+                    
+                    // Don't fetch suggestions if query is empty
+                    if (!this.query.trim()) {
+                        this.suggestions = [];
+                        this.showSuggestions = false;
+                        return;
+                    }
+                    
+                    // Debounce suggestion requests
+                    this.suggestionDebounceTimer = setTimeout(async () => {
+                        try {
+                            const response = await this.api.search({
+                                q: this.query,
+                                type: 'suggest',
+                                lang: this.language
+                            });
+                            
+                            this.suggestions = response.suggestions || [];
+                            this.showSuggestions = this.suggestions.length > 0;
+                        } catch (err) {
+                            console.error('Suggestion error:', err);
+                            this.suggestions = [];
+                        }
+                    }, 300);
+                },
+                handleSearchBlur() {
+                    // Delay hiding suggestions to allow click events to fire
+                    setTimeout(() => {
+                        this.showSuggestions = false;
+                    }, 200);
+                },
                 async performSearch() {
                     if (!this.query.trim()) {
                         return;
                     }
+                    
+                    // Hide suggestions
+                    this.showSuggestions = false;
 
                     this.loading = true;
                     this.error = null;
                     this.searchPerformed = true;
                     this.results = [];
-                    this.panelData = null;
 
                     try {
                         const options = {
@@ -324,16 +359,10 @@
                         url.searchParams.set('q', this.query);
                         window.history.pushState({}, '', url);
 
-                        // Process results based on type
-                        if (this.currentType === 'suggest') {
-                            this.results = response.suggestions || [];
-                        } else if (this.currentType === 'panel') {
-                            this.panelData = response.panel || null;
-                        } else {
-                            this.results = response.results || [];
-                            if (response.pagination) {
-                                this.totalPages = response.pagination.totalPages || 10;
-                            }
+                        // Process results
+                        this.results = response.results || [];
+                        if (response.pagination) {
+                            this.totalPages = response.pagination.totalPages || 10;
                         }
                     } catch (err) {
                         if (err instanceof WholphinAPIError) {
@@ -366,7 +395,8 @@
                 },
                 selectSuggestion(suggestion) {
                     this.query = suggestion;
-                    this.currentType = 'web';
+                    this.showSuggestions = false;
+                    this.suggestions = [];
                     this.performSearch();
                 },
                 handleFaviconError(event) {
@@ -383,9 +413,7 @@
                         'web': 'stack-web',
                         'image': '',
                         'video': 'stack-video',
-                        'news': 'stack-news',
-                        'suggest': 'stack-sm',
-                        'panel': ''
+                        'news': 'stack-news'
                     };
                     return classMap[this.currentType] || 'stack';
                 }
@@ -412,6 +440,61 @@
         .slide-down-leave-to {
             opacity: 0;
             transform: translateY(-10px);
+        }
+        
+        /* Search box wrapper for positioning */
+        .search-box-wrapper {
+            position: relative;
+        }
+        
+        /* Suggestions dropdown */
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            background-color: var(--color-bg-primary);
+            border: 1px solid var(--color-border-primary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            z-index: var(--z-index-dropdown);
+            overflow: hidden;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            text-align: left;
+            background: none;
+            border: none;
+            border-bottom: 1px solid var(--color-border-primary);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            transition: background-color var(--transition-fast);
+            font-size: var(--font-size-base);
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .suggestion-item:hover {
+            background-color: var(--color-bg-secondary);
+        }
+        
+        .suggestion-item:active {
+            background-color: var(--color-bg-tertiary);
+        }
+        
+        .suggestion-icon {
+            flex-shrink: 0;
+            color: var(--color-text-tertiary);
         }
         
         /* Result header with favicon */
