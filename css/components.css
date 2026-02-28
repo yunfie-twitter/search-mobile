@@ -1,8 +1,8 @@
 /* ===================================
-   TAB BAR - Modern Bottom Navigation with FAB
+   TAB BAR - Simplified Bottom Navigation
+   ホーム / 検索FAB / 履歴
    =================================== */
 
-/* タブバーコンテナ - すべての問題を修正 */
 .tab-bar {
     position: fixed;
     bottom: 0;
@@ -22,7 +22,7 @@
     transition: transform var(--transition-base);
 }
 
-/* タブバーアイテム - 3つのタイプのみ */
+/* タブバーアイテム - ホームと履歴 */
 .tab-bar-item {
     display: flex;
     flex-direction: column;
@@ -43,20 +43,7 @@
     position: relative;
 }
 
-/* タブ間の分離線 */
-.tab-bar-item:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 24px;
-    background: var(--color-border);
-    opacity: 0.5;
-}
-
-/* アクティブ状態 - 視認性を大幅改善 */
+/* アクティブ状態 */
 .tab-bar-item.active {
     color: var(--color-primary);
 }
@@ -71,7 +58,7 @@
     transition: opacity var(--transition-fast);
 }
 
-/* ホバー状態 - デスクトップ対応 */
+/* ホバー状態 */
 @media (hover: hover) {
     .tab-bar-item:hover:not(.active) {
         background: var(--color-neutral-100);
@@ -79,20 +66,20 @@
     }
 }
 
-/* タップ時の反応 - 高速化 */
+/* タップ時の反応 */
 .tab-bar-item:active {
     transform: scale(0.95);
     transition-duration: 100ms;
 }
 
-/* フォーカス状態 - アクセシビリティ */
+/* フォーカス状態 */
 .tab-bar-item:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
     z-index: 1;
 }
 
-/* アイコン - サイズ拡大 */
+/* アイコン */
 .tab-bar-icon {
     width: 28px;
     height: 28px;
@@ -113,7 +100,7 @@
     height: 100%;
 }
 
-/* ラベル - フォントサイズ拡大 */
+/* ラベル */
 .tab-bar-label {
     font-size: 0.6875rem; /* 11px */
     font-weight: var(--font-semibold);
@@ -203,10 +190,7 @@
     }
 }
 
-/* ===================================
-   エラー/通知バッジ
-   =================================== */
-
+/* 履歴バッジ */
 .tab-bar-badge {
     position: absolute;
     top: 8px;
@@ -215,7 +199,7 @@
     min-width: 18px;
     height: 18px;
     padding: 0 4px;
-    background: var(--color-error);
+    background: var(--color-primary);
     color: white;
     font-size: 10px;
     font-weight: var(--font-bold);
@@ -225,6 +209,257 @@
     justify-content: center;
     border: 2px solid var(--color-background);
     z-index: 2;
+}
+
+/* ===================================
+   検索タイプチップ(上部ヘッダー用)
+   =================================== */
+
+.search-type-chips {
+    display: flex;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.search-type-chips::-webkit-scrollbar {
+    display: none;
+}
+
+.search-type-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: var(--color-neutral-700);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.search-type-chip:hover {
+    background: var(--color-neutral-100);
+    border-color: var(--color-primary-200);
+}
+
+.search-type-chip.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.search-type-chip-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-type-chip-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* ===================================
+   履歴モーダル
+   =================================== */
+
+.history-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.history-modal {
+    width: 100%;
+    max-height: 70vh;
+    background: var(--color-background);
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.history-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.history-modal-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--color-neutral-900);
+    margin: 0;
+}
+
+.history-modal-close {
+    min-width: 36px;
+    min-height: 36px;
+    padding: var(--space-2);
+    border: none;
+    background: var(--color-neutral-100);
+    color: var(--color-neutral-700);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.history-modal-close:hover {
+    background: var(--color-neutral-200);
+}
+
+.history-modal-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+}
+
+.history-modal-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.history-modal-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+    width: 100%;
+}
+
+.history-modal-item:hover {
+    background: var(--color-neutral-100);
+    border-color: var(--color-primary-200);
+}
+
+.history-modal-item:active {
+    transform: scale(0.98);
+}
+
+.history-modal-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--color-neutral-500);
+}
+
+.history-modal-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-modal-query {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--color-neutral-900);
+    margin: 0 0 var(--space-1) 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.history-modal-meta {
+    font-size: var(--text-xs);
+    color: var(--color-neutral-500);
+    margin: 0;
+}
+
+.history-modal-delete {
+    min-width: 36px;
+    min-height: 36px;
+    padding: var(--space-2);
+    border: none;
+    background: transparent;
+    color: var(--color-neutral-400);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.history-modal-delete:hover {
+    background: var(--color-error);
+    color: white;
+}
+
+.history-modal-empty {
+    text-align: center;
+    padding: var(--space-12) var(--space-4);
+}
+
+.history-modal-empty-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-4);
+    color: var(--color-neutral-300);
+}
+
+.history-modal-empty-text {
+    font-size: var(--text-base);
+    color: var(--color-neutral-600);
+    margin: 0;
+}
+
+.history-modal-footer {
+    padding: var(--space-4);
+    border-top: 1px solid var(--color-border);
+}
+
+.history-modal-clear {
+    width: 100%;
+    padding: var(--space-3);
+    border: 1px solid var(--color-error);
+    background: transparent;
+    color: var(--color-error);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.history-modal-clear:hover {
+    background: var(--color-error);
+    color: white;
 }
 
 /* ===================================
@@ -247,7 +482,7 @@
     }
     
     .tab-bar-label {
-        font-size: 0.625rem; /* 10px - 小さい画面では少し縮小 */
+        font-size: 0.625rem;
     }
     
     .tab-bar-fab {
@@ -262,7 +497,6 @@
     }
 }
 
-/* ランドスケープモード対応 */
 @media (orientation: landscape) and (max-height: 500px) {
     .tab-bar {
         height: 56px;
@@ -277,13 +511,17 @@
         height: 48px;
         bottom: 12px;
     }
+    
+    .history-modal {
+        max-height: 80vh;
+    }
 }
 
 /* ===================================
    その他のコンポーネント
    =================================== */
 
-/* Context Menu with Glass */
+/* Context Menu */
 .context-menu {
     position: fixed;
     min-width: 220px;
