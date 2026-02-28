@@ -4,23 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Wholphin Search - プライバシーを重視した検索エンジン">
-    <meta name="theme-color" content="#007AFF">
+    <meta name="theme-color" content="#3b82f6">
     <title>Wholphin Search</title>
     
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23007AFF'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23007AFF'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%233b82f6'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%233b82f6'/%3E%3Cpath d='M30 45 Q50 30 70 45 T70 65 Q50 80 30 65 Z' fill='white'/%3E%3C/svg%3E">
     
+    <!-- 統一されたデザインシステム -->
     <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/liquid-glass.css">
-    <link rel="stylesheet" href="css/search-redesign.css">
-    <link rel="stylesheet" href="css/fonts.css">
-    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/utilities.css">
     <link rel="stylesheet" href="css/desktop.css">
-    <link rel="stylesheet" href="css/advanced-features.css">
     <link rel="stylesheet" href="css/start-page.css">
     <link rel="stylesheet" href="css/settings-page.css">
     <link rel="stylesheet" href="css/mobile-search.css">
@@ -36,7 +30,7 @@
         <transition name="slide-up-full">
             <div v-if="showMobileSearch" class="mobile-search-overlay">
                 <div class="mobile-search-header">
-                    <button class="mobile-search-back" @click="closeMobileSearch" aria-label="戻る">
+                    <button class="mobile-search-back btn-icon" @click="closeMobileSearch" aria-label="戻る">
                         <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M19 12H5M12 19l-7-7 7-7"/>
                         </svg>
@@ -53,7 +47,7 @@
                             autocomplete="off"
                         >
                     </div>
-                    <button v-if="query" class="mobile-search-clear" @click="clearMobileSearch" aria-label="クリア">
+                    <button v-if="query" class="mobile-search-clear btn-icon" @click="clearMobileSearch" aria-label="クリア">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="9" cy="9" r="7"/>
                             <path d="M12 6L6 12M6 6l6 6"/>
@@ -105,7 +99,7 @@
                                     <span class="mobile-search-text">{{ item.query }}</span>
                                     <span class="mobile-search-meta">{{ getTypeLabel(item.type) }}</span>
                                 </div>
-                                <button class="mobile-search-delete" @click.stop="deleteHistory(item.query)" aria-label="削除">
+                                <button class="mobile-search-delete btn-icon" @click.stop="deleteHistory(item.query)" aria-label="削除">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
                                         <path d="M12 4L4 12M4 4l8 8"/>
                                     </svg>
@@ -115,12 +109,12 @@
                     </div>
 
                     <!-- Empty State -->
-                    <div v-if="searchHistory.length === 0 && !query" class="mobile-search-empty">
-                        <svg width="72" height="72" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <circle cx="36" cy="36" r="28"/>
+                    <div v-if="searchHistory.length === 0 && !query" class="empty-state">
+                        <svg class="empty-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="28"/>
                             <path d="M52 52l-10-10"/>
                         </svg>
-                        <p>検索履歴がありません</p>
+                        <p class="empty-description">検索履歴がありません</p>
                     </div>
                 </div>
             </div>
@@ -182,7 +176,7 @@
                     <span class="search-tab-label">{{ tab.title }}</span>
                     <button 
                         v-if="tabs.length > 1"
-                        class="search-tab-close"
+                        class="search-tab-close btn-icon"
                         @click.stop="closeTab(tab.id)"
                         aria-label="タブを閉じる"
                     >
@@ -191,7 +185,7 @@
                         </svg>
                     </button>
                 </button>
-                <button class="tab-new" @click="createNewTab" title="新しいタブ" aria-label="新しいタブ">
+                <button class="tab-new btn-icon" @click="createNewTab" title="新しいタブ" aria-label="新しいタブ">
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M8 3v10M3 8h10"/>
                     </svg>
@@ -287,7 +281,7 @@
                 <div v-if="currentView === 'settings'" class="settings-page">
                     <div class="settings-container">
                         <div class="settings-header">
-                            <button class="settings-back" @click="closeSettings" aria-label="戻る">
+                            <button class="settings-back btn-icon" @click="closeSettings" aria-label="戻る">
                                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="15 18 9 12 15 6"></polyline>
                                 </svg>
@@ -360,7 +354,7 @@
                                             <label class="settings-item-label">検索履歴</label>
                                             <p class="settings-item-description">{{ searchHistory.length }}件の履歴が保存されています</p>
                                         </div>
-                                        <button class="settings-button-danger" @click="clearHistoryConfirm">クリア</button>
+                                        <button class="btn-secondary" @click="clearHistoryConfirm">クリア</button>
                                     </div>
                                     <div class="settings-divider"></div>
                                     <div class="settings-item">
@@ -382,7 +376,7 @@
                                     <div class="settings-item">
                                         <div class="settings-item-info">
                                             <label class="settings-item-label">バージョン</label>
-                                            <p class="settings-item-description">Wholphin Search 2.0 - Liquid Glass Edition</p>
+                                            <p class="settings-item-description">Wholphin Search 2.1 - Unified Design System</p>
                                         </div>
                                     </div>
                                 </div>
@@ -468,14 +462,14 @@
                                                     <div class="history-query">{{ item.query }}</div>
                                                     <div class="history-meta">{{ formatTimestamp(item.timestamp) }} · {{ getTypeLabel(item.type) }}</div>
                                                 </div>
-                                                <button class="history-delete" @click.stop="deleteHistory(item.query)" aria-label="削除">
+                                                <button class="history-delete btn-icon" @click.stop="deleteHistory(item.query)" aria-label="削除">
                                                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                                                         <path d="M12 4L4 12M4 4l8 8"/>
                                                     </svg>
                                                 </button>
                                             </button>
                                         </div>
-                                        <button class="history-clear" @click="clearHistory">履歴をクリア</button>
+                                        <button class="history-clear btn-secondary" @click="clearHistory">履歴をクリア</button>
                                     </div>
                                 </transition>
                             </div>
@@ -485,7 +479,7 @@
                                     v-for="view in viewModes" 
                                     :key="view.value"
                                     @click="viewMode = view.value"
-                                    :class="['toolbar-button', { 'active': viewMode === view.value }]"
+                                    :class="['btn-icon', { 'active': viewMode === view.value }]"
                                     :title="view.label"
                                 >
                                     <div class="toolbar-icon" v-html="view.icon"></div>
@@ -494,7 +488,7 @@
 
                             <div class="toolbar-divider"></div>
 
-                            <button class="toolbar-button" @click="toggleSettings" title="設定">
+                            <button class="btn-icon" @click="toggleSettings" title="設定">
                                 <div class="toolbar-icon">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="8" cy="8" r="2"></circle>
@@ -522,16 +516,16 @@
                                     </div>
                                 </div>
 
-                                <div v-if="error" class="alert alert-warning content-area">
+                                <div v-if="error" class="alert alert-error content-area">
                                     <div class="alert-icon">
                                         <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                            <line x1="12" y1="9" x2="12" y2="13"></line>
-                                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
                                         </svg>
                                     </div>
                                     <div>
-                                        <strong>問題が発生しました</strong>
+                                        <strong>エラーが発生しました</strong>
                                         <p class="alert-message">{{ error }}</p>
                                     </div>
                                 </div>
@@ -550,11 +544,6 @@
                                                             loading="lazy"
                                                             @error="handleFaviconError($event)"
                                                         >
-                                                        <div class="result-favicon-fallback" v-else>
-                                                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM4.5 7.5a.5.5 0 0 1 0-1h5.793L8.146 4.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 7.5H4.5z"/>
-                                                            </svg>
-                                                        </div>
                                                         <h3 class="result-title">{{ item.title }}</h3>
                                                     </div>
                                                     <p class="result-description">{{ item.summary || item.description }}</p>
@@ -583,19 +572,12 @@
                                                             </svg>
                                                         </div>
                                                     </div>
-                                                    <h3 class="result-title-video">{{ item.title }}</h3>
+                                                    <h3 class="result-title">{{ item.title }}</h3>
                                                     <p class="result-description">{{ item.summary || item.description }}</p>
                                                     <div class="video-meta" v-if="item.duration || item.views">
                                                         <span v-if="item.duration" class="meta-badge">{{ item.duration }}</span>
                                                         <span v-if="item.views" class="meta-badge">{{ formatViews(item.views) }} 回視聴</span>
                                                     </div>
-                                                    <button v-if="currentType === 'video'" class="pip-button" @click.prevent="togglePiP(item)">
-                                                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                            <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5v-9zM1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"/>
-                                                            <path d="M8 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-3z"/>
-                                                        </svg>
-                                                        PiP
-                                                    </button>
                                                 </a>
                                             </article>
                                         </div>
@@ -605,7 +587,7 @@
                                                 <a :href="item.url" target="_blank" rel="noopener noreferrer" class="result-link">
                                                     <div class="news-content">
                                                         <div class="news-text">
-                                                            <h3 class="result-title-news">{{ item.title }}</h3>
+                                                            <h3 class="result-title">{{ item.title }}</h3>
                                                             <p class="result-description">{{ item.summary || item.description }}</p>
                                                             <div class="news-meta" v-if="item.source || item.date">
                                                                 <span v-if="item.source" class="meta-source">{{ item.source }}</span>
@@ -621,14 +603,12 @@
                                 </transition>
 
                                 <div v-if="!loading && !error && searchPerformed && results.length === 0" class="empty-state content-area">
-                                    <div class="empty-icon">
-                                        <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="32" cy="32" r="28"></circle>
-                                            <path d="m52 52-8-8"></path>
-                                        </svg>
-                                    </div>
+                                    <svg class="empty-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 64 64">
+                                        <circle cx="32" cy="32" r="28"></circle>
+                                        <path d="m52 52-8-8"></path>
+                                    </svg>
                                     <h3 class="empty-title">検索結果が見つかりませんでした</h3>
-                                    <p class="empty-description">別のキーワードをお試しください</p>
+                                    <p class="empty-description">別のキーワードでお試しください</p>
                                 </div>
 
                                 <div v-if="!loading && results.length > 0 && totalPages > 1" class="pagination content-area">
@@ -715,7 +695,7 @@
                     <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5v-9z"/>
                 </svg>
                 <span class="pip-indicator-text">PiP再生中</span>
-                <button class="pip-close" @click="exitPiP" aria-label="PiPを終了">
+                <button class="pip-close btn-icon" @click="exitPiP" aria-label="PiPを終了">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 3L3 9M3 3l6 6"/>
                     </svg>
@@ -997,7 +977,7 @@
                         this.clearHistory();
                     }
                 },
-                handleFaviconError(event) { event.target.style.display = 'none'; const fallback = event.target.nextElementSibling; if (fallback?.classList.contains('result-favicon-fallback')) fallback.style.display = 'flex'; },
+                handleFaviconError(event) { event.target.style.display = 'none'; },
                 extractDomain(url) { try { return new URL(url).hostname.replace('www.', ''); } catch { return url; } },
                 formatViews(views) { if (typeof views === 'string') return views; if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M'; if (views >= 1000) return (views / 1000).toFixed(1) + 'K'; return views; },
                 formatTimestamp(ts) { const diff = Date.now() - ts, mins = Math.floor(diff / 60000), hrs = Math.floor(diff / 3600000), days = Math.floor(diff / 86400000); if (mins < 60) return mins + '分前'; if (hrs < 24) return hrs + '時間前'; return days + '日前'; },
